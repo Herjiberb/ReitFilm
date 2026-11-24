@@ -122,6 +122,27 @@ select option{background:var(--s1)}
 .ab.dl.on{background:#5b6290;box-shadow:none}
 #toast{position:fixed;bottom:84px;left:50%;transform:translate(-50%,30px);background:var(--s3);padding:12px 20px;border-radius:99px;opacity:0;transition:.4s var(--sp);z-index:90;pointer-events:none;font-weight:700}
 #toast.on{opacity:1;transform:translate(-50%,0)}
+#sx{position:fixed;inset:0;z-index:70;background:#02030acc;backdrop-filter:blur(12px);display:grid;justify-items:center;align-content:start;padding:min(12vh,90px) 14px 14px;animation:fd .2s}
+.sxb{width:min(640px,100%);background:linear-gradient(170deg,var(--s2),var(--s1));border:1px solid #ffffff18;border-radius:30px;box-shadow:0 40px 100px #000c,0 0 70px #3b82ff22;overflow:hidden;animation:pop .4s both}
+.sxi{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #ffffff0f}
+.sxi .i{width:22px;height:22px;color:var(--b2)}
+.sxi input{flex:1;font-size:18px;outline:0;color:var(--t);min-width:0}
+kbd{font:700 11px ui-rounded,system-ui,sans-serif;background:var(--s3);color:var(--m);padding:3px 8px;border-radius:8px;margin-left:auto}
+.nb kbd{background:#ffffff12}
+#sxr{max-height:min(56vh,480px);overflow:auto;padding:8px}
+.sxr{display:flex;align-items:center;gap:12px;width:100%;padding:8px 10px;border-radius:18px;text-align:left;transition:background .15s}
+.sxr.on,.sxr:hover{background:var(--s3)}
+.sxr .po{width:40px;flex:none;border-radius:9px;box-shadow:none}
+.sxr .tx{flex:1;min-width:0}.sxr b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sxr small{color:var(--m);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sxr mark{background:none;color:var(--p)}
+.sxc{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--c);flex:none}
+.sxc .sv{color:var(--b2);display:grid}
+.sxh{padding:12px 12px 6px;color:var(--m);font-size:13px;font-weight:700}
+.sxs{padding:0 10px 14px;display:flex;flex-wrap:wrap;gap:8px}
+.sxf{padding:10px 18px;color:var(--m);font-size:12.5px;border-top:1px solid #ffffff0f}
+.sxf:empty{display:none}
+@media(max-width:860px){.kh{display:none}.sxc span{display:none}}
 @media(max-width:860px){
 #app{grid-template-columns:1fr}
 #nv{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;z-index:40;flex-direction:row;justify-content:space-around;padding:8px 10px calc(8px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid #ffffff14;background:#080b18f2;backdrop-filter:blur(14px)}
@@ -166,6 +187,7 @@ select option{background:var(--s1)}
 <div id="app" hidden>
 <nav id="nv">
 <div class="brand"><svg><use href="#logo"/></svg>ReitFilm</div>
+<button class="nb sq" data-sx><svg class="i"><use href="#search"/></svg>Search<kbd class="kh">/</kbd></button>
 <button class="nb sq" data-v="home"><svg class="i"><use href="#home"/></svg>Home</button>
 <button class="nb sq" data-v="lib"><svg class="i"><use href="#grid"/></svg>Library</button>
 <button class="nb sq" data-v="seen"><svg class="i"><use href="#check"/></svg>Watched</button>
@@ -173,6 +195,7 @@ select option{background:var(--s1)}
 </nav>
 <main id="main"></main>
 </div>
+<div id="sx" hidden><div class="sxb"><div class="sxi"><svg class="i"><use href="#search"/></svg><input id="sxq" placeholder="Search title, director, tag, year…" autocomplete="off" spellcheck="false" aria-label="Search reviewed movies"><kbd>Esc</kbd></div><div id="sxr"></div><div class="sxf" id="sxf"></div></div></div>
 <div id="md" hidden></div>
 <div id="toast"></div>
 
@@ -295,6 +318,7 @@ m.t=Date.now();if(!m.seen&&!m.liked){S.marks.delete(id);await del('marks',m.k)}e
 function closeModal(){S.open=null;$('#md').hidden=true;$('#md').innerHTML='';render()}
 /* events */
 document.addEventListener('click',e=>{const t=e.target;let b;
+if(t.closest('[data-sx]'))return openSx();
 if(b=t.closest('[data-act]'))return mark(S.open,b.dataset.act);
 if(t.closest('[data-x]')||t.id==='md')return closeModal();
 if(b=t.closest('.card'))return openModal(+b.dataset.id);
@@ -303,6 +327,40 @@ if(b=t.closest('[data-v]'))return go2(b.dataset.v)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.open)closeModal()});
 $('#so').onclick=()=>{delete localStorage.rf_uid;location.reload()};
 $('#dp').onclick=async()=>{if(await delProfile(S.user.id))location.reload()};
+/* search */
+const SX={sel:0,res:[]};
+const subseq=(s,t)=>{let i=0;for(const c of s){if(c===t[i])i++;if(i===t.length)return true}return false};
+function sxScore(r,toks){const d=S.det.get(r.id),ti=d?d.title.toLowerCase():'',di=d?(d.dir||'').toLowerCase():'',gn=d?(d.genres||[]).join(' ').toLowerCase():'',yr=d?String(d.year||''):'';
+const tg=r.tags.map(t=>TAGS[t][0].toLowerCase()).concat(r.custom),rn=RT[r.r].n.toLowerCase(),m=S.marks.get(r.id),sn=!!(m&&m.seen),words=ti.split(/[\s:\-.,&]+/);let tot=0;
+for(const t of toks){let b=0;
+if(ti){if(ti===t)b=130;else if(ti.startsWith(t))b=100;else if(words.some(w=>w.startsWith(t)))b=70;else if(ti.includes(t))b=45;else if(t.length>=3&&subseq(ti,t))b=15}
+if(di.includes(t))b=Math.max(b,35);
+if(tg.some(x=>x===t))b=Math.max(b,40);else if(tg.some(x=>x.startsWith(t)||(t.length>2&&x.includes(t))))b=Math.max(b,28);
+if(gn.includes(t))b=Math.max(b,22);
+if(yr&&yr.startsWith(t)&&/^\d+$/.test(t))b=Math.max(b,30);
+if(rn.includes(t)||(t==='dnw'&&r.r===0)||(t==='mustwatch'&&r.r===4))b=Math.max(b,24);
+if((t==='seen'&&sn)||(t==='unseen'&&!sn)||(t==='watched'&&sn)||((t==='liked'||t==='loved')&&m&&m.liked>0))b=Math.max(b,26);
+if(r.note&&r.note.toLowerCase().includes(t))b=Math.max(b,12);
+if(!b)return-1;tot+=b}return tot}
+function hl(title,toks){const l=title.toLowerCase();for(const t of toks){const i=l.indexOf(t);if(i>=0)return esc(title.slice(0,i))+'<mark>'+esc(title.slice(i,i+t.length))+'</mark>'+esc(title.slice(i+t.length))}return esc(title)}
+function sxRun(){const q=$('#sxq').value.trim().toLowerCase(),box=$('#sxr'),ft=$('#sxf');
+if(!q){SX.res=[];box.innerHTML=`<div class="sxh">Try searching for</div><div class="sxs">${['must watch','unseen','loved','2010s','thriller','hidden gem','do not watch'].map(x=>`<button class="pill sq" data-sq="${x}">${x}</button>`).join('')}</div>`;ft.textContent=`${S.reviews.length} reviewed movies`;return}
+const toks=q.split(/\s+/);
+SX.res=S.reviews.map(r=>({r,s:sxScore(r,toks)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s||b.r.r-a.r.r||b.r.i-a.r.i).slice(0,40);SX.sel=0;
+box.innerHTML=SX.res.length?SX.res.map((x,i)=>{const r=x.r,d=S.det.get(r.id),R=RT[r.r],m=S.marks.get(r.id);
+const meta=[d&&d.year,d&&d.dir,r.tags.slice(0,3).map(t=>TAGS[t][0]).join(', ')].filter(Boolean).join('  \u2022  ');
+return `<button class="sxr ${i?'':'on'}" data-sid="${r.id}"><div class="po" data-p="${d?esc(d.poster||''):''}"></div><div class="tx"><b>${d?hl(d.title,toks):'Loading…'}</b><small>${esc(meta)}</small></div><div class="sxc" style="--c:${R.c}">${m&&m.seen?`<span class="sv">${ico(m.liked>0?'heart':m.liked<0?'r1':'eye')}</span>`:''}${ico('r'+r.r)}<span>${R.n}</span></div></button>`}).join(''):`<div class="empty" style="padding:40px 20px">${ico('film')}<p>No reviewed movie matches \u201c${esc(q)}\u201d.</p></div>`;
+hy(box);ft.textContent=SX.res.length?(SX.res.length+(SX.res.length===1?' result':' results')+'  \u2022  \u2191\u2193 to move, Enter to open'):'';
+if(S.det.size<S.reviews.length&&ft.textContent)ft.textContent+='  \u2022  still loading some titles';else if(S.det.size<S.reviews.length)ft.textContent='Still loading some titles. Results may be incomplete.'}
+function sxMove(d){const rows=$$('.sxr');if(!rows.length)return;rows[SX.sel].classList.remove('on');SX.sel=(SX.sel+d+rows.length)%rows.length;rows[SX.sel].classList.add('on');rows[SX.sel].scrollIntoView({block:'nearest'})}
+function openSx(){if(!S.user||S.open)return;$('#sx').hidden=false;$('#sxq').value='';sxRun();setTimeout(()=>$('#sxq').focus(),20)}
+function closeSx(){$('#sx').hidden=true}
+function sxOpen(id){closeSx();openModal(id)}
+$('#sxq').addEventListener('input',sxRun);
+$('#sxq').addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();sxMove(1)}else if(e.key==='ArrowUp'){e.preventDefault();sxMove(-1)}else if(e.key==='Enter'&&SX.res[SX.sel])sxOpen(SX.res[SX.sel].r.id)});
+$('#sx').addEventListener('click',e=>{const t=e.target;if(t.id==='sx')return closeSx();let b;if(b=t.closest('[data-sid]'))return sxOpen(+b.dataset.sid);if(b=t.closest('[data-sq]')){$('#sxq').value=b.dataset.sq;sxRun();$('#sxq').focus()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#sx').hidden){closeSx();return}
+if(((e.key==='k'||e.key==='K')&&(e.ctrlKey||e.metaKey))||(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))){if(!$('#app').hidden){e.preventDefault();openSx()}}});
 /* boot */
 (async()=>{
 const txt=await fetch('reviews.txt').then(r=>r.ok?r.text():'').catch(()=>'');
