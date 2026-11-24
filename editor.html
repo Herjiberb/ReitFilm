@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#06070d">
+<title>ReitFilm Studio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='18' fill='%232f5bff'/%3E%3Cpath d='M26 20.5v23a2 2 0 0 0 3 1.7l18-11.5a2 2 0 0 0 0-3.4L29 18.8a2 2 0 0 0-3 1.7z' fill='%23ff8ad8'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23ff8ad8' stroke='%2306070d' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--bg:#06070d;--s1:#0c1020;--s2:#131937;--s3:#1b2350;--b:#3b82ff;--b2:#6aa8ff;--p:#ff8ad8;--t:#e9edff;--m:#8a93b8;--sp:cubic-bezier(.34,1.8,.5,1)}
+html{color-scheme:dark}
+body{font:500 14.5px/1.4 ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--t);height:100vh;overflow:hidden}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(60vw 50vh at 0 0,#16337a66,transparent),radial-gradient(50vw 50vh at 100% 100%,#ff8ad81f,transparent)}
+button,input,select,textarea{font:inherit;color:inherit;border:0;background:none}
+button{cursor:pointer}[hidden]{display:none!important}
+.i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sq{transition:transform .45s var(--sp),background .25s,box-shadow .3s,border-color .25s,opacity .2s}
+.sq:hover{transform:scale(1.04)}.sq:active{transform:scale(.92,.86)}
+:focus-visible{outline:2px solid var(--p);outline-offset:2px}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:#26305f;border-radius:9px}
+#ld{position:fixed;inset:0;z-index:99;background:var(--bg);display:grid;place-content:center;justify-items:center;gap:20px;transition:opacity .4s,visibility .4s}
+#ld.gone{opacity:0;visibility:hidden}
+#ld .lg{width:88px;height:88px;animation:jelly 1.3s var(--sp) infinite;filter:drop-shadow(0 12px 30px #3b82ff88)}
+#ld b{font-size:24px}
+.bar{width:150px;height:8px;background:var(--s2);border-radius:9px;overflow:hidden}
+.bar i{display:block;width:45%;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--b),var(--p));animation:bar 1s ease-in-out infinite}
+@keyframes bar{0%{transform:translateX(-100%)}100%{transform:translateX(230%)}}
+@keyframes jelly{0%,100%{transform:scale(1)}25%{transform:scale(1.14,.86)}50%{transform:scale(.9,1.1)}75%{transform:scale(1.05,.96)}}
+@keyframes pop{0%{transform:scale(.92,1.06);opacity:0}60%{transform:scale(1.02,.99);opacity:1}100%{transform:none;opacity:1}}
+header{display:flex;align-items:center;gap:14px;padding:14px 22px;background:#080b18cc;border-bottom:1px solid #ffffff0d;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800}
+.brand svg{width:36px;height:36px}.brand small{font-size:12px;color:var(--p);font-weight:700;background:#ff8ad81f;padding:3px 9px;border-radius:99px}
+.sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:16px;font-weight:700;background:var(--s2)}
+.btn:hover{background:var(--s3)}
+.btn.pr{background:linear-gradient(135deg,var(--b),#6a5cff);box-shadow:0 8px 22px #3b82ff55}
+.btn.pk{background:linear-gradient(135deg,var(--p),#c77dff);color:#240a22;box-shadow:0 8px 22px #ff8ad855}
+.stat{color:var(--m);font-size:13px;display:flex;gap:12px}.stat b{color:var(--t)}
+#wrap{display:grid;grid-template-columns:400px 1fr;height:calc(100vh - 68px)}
+#left{display:flex;flex-direction:column;border-right:1px solid #ffffff0d;min-height:0}
+.srch{position:relative;padding:14px}
+.fld{background:#0a0e22;border:2px solid #ffffff10;border-radius:16px;padding:12px 14px;width:100%;outline:0;transition:border-color .2s,transform .4s var(--sp)}
+.fld:focus{border-color:var(--b)}
+#res{position:absolute;left:14px;right:14px;top:62px;background:var(--s2);border-radius:20px;z-index:20;box-shadow:0 20px 50px #000b;overflow:hidden;animation:pop .3s both}
+.rr{display:flex;gap:10px;align-items:center;padding:8px 12px;width:100%;text-align:left}
+.rr:hover{background:var(--s3)}.rr img,.rr i{width:34px;height:50px;border-radius:8px;object-fit:cover;background:var(--s3);flex:none}
+.rr small{color:var(--m);display:block}
+.tabs{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:99px;background:var(--s2);color:var(--m);font-weight:700;font-size:13px;border:2px solid transparent}
+.pill.on{color:var(--c,#fff);border-color:var(--c,var(--b));background:color-mix(in srgb,var(--c,var(--b)) 16%,var(--s1))}
+#list{flex:1;overflow-y:auto;padding:0 10px 20px}
+.li{display:flex;gap:12px;align-items:center;padding:8px;border-radius:18px;width:100%;text-align:left;border:2px solid transparent}
+.li:hover{background:var(--s2)}.li.on{background:var(--s2);border-color:var(--b)}
+.th{width:42px;height:62px;border-radius:10px;background:var(--s3);overflow:hidden;flex:none;position:relative}
+.th img{width:100%;height:100%;object-fit:cover}
+.li .tt{flex:1;min-width:0}.li b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.li small{color:var(--m)}
+.rb{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);flex:none}
+.dot{font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px}
+.dot.n{background:#3b82ff33;color:var(--b2)}.dot.e{background:#ff8ad833;color:var(--p)}
+#right{overflow-y:auto;padding:26px clamp(16px,3vw,40px) 60px}
+.ed{display:grid;grid-template-columns:200px 1fr;gap:28px;max-width:1000px;animation:pop .45s both}
+.po{aspect-ratio:2/3;border-radius:22px;background:var(--s2);overflow:hidden;box-shadow:0 14px 34px #0009}
+.po img{width:100%;height:100%;object-fit:cover}
+.ed h2{font-size:30px;line-height:1.1}.meta{color:var(--m);margin:4px 0 8px}
+.ov{color:#aeb6d9;max-height:4.4em;overflow:hidden;margin-bottom:14px}
+h3{font-size:13px;color:var(--m);margin:18px 0 8px;font-weight:700;display:flex;align-items:center;gap:10px}
+.rs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.rt{display:grid;justify-items:center;gap:3px;padding:12px 4px;border-radius:20px;background:var(--s1);border:2px solid color-mix(in srgb,var(--c) 28%,transparent);color:var(--c);font-size:11px;font-weight:800;text-align:center}
+.rt .i{width:28px;height:28px}
+.rt.on{background:color-mix(in srgb,var(--c) 22%,var(--s1));border-color:var(--c);box-shadow:0 8px 26px color-mix(in srgb,var(--c) 35%,transparent)}
+.tg{display:flex;flex-wrap:wrap;gap:6px}
+.tag{padding:6px 12px;border-radius:99px;background:var(--s2);color:var(--m);font-weight:700;font-size:13px;border:2px solid transparent}
+.tag.on{background:var(--b);color:#fff}.tag.sg{border:2px dashed var(--p);color:var(--p)}.tag.cu.on{background:var(--p);color:#2a0b28}
+textarea.fld{min-height:110px;resize:vertical}
+.empty{height:100%;display:grid;place-content:center;justify-items:center;gap:12px;color:var(--m);text-align:center;padding:20px}
+.empty .i{width:56px;height:56px;color:var(--p)}
+#md{position:fixed;inset:0;z-index:60;background:#02030acc;backdrop-filter:blur(10px);display:grid;place-items:center;padding:16px}
+.sheet{width:min(620px,100%);background:var(--s1);border-radius:30px;padding:26px;display:grid;gap:12px;border:1px solid #ffffff14;animation:pop .45s both}
+#log{max-height:180px;overflow:auto;font-size:13px;color:var(--m);display:grid;gap:3px}
+#log .ok{color:#6fe3a0}#log .no{color:#ff6b8f}
+#toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%,30px);background:var(--s3);padding:12px 20px;border-radius:99px;opacity:0;transition:.4s var(--sp);z-index:90;pointer-events:none;font-weight:700}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#drop{margin:14px;padding:22px;border:2px dashed #ffffff25;border-radius:22px;text-align:center;color:var(--m)}
+@media(max-width:900px){body{overflow:auto;height:auto}#wrap{grid-template-columns:1fr;height:auto}#left{max-height:60vh}.ed{grid-template-columns:1fr}.po{width:140px}.rs{grid-template-columns:repeat(3,1fr)}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f8bff"/><stop offset="1" stop-color="#2a2fd6"/></linearGradient>
+<linearGradient id="gp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3ec"/><stop offset="1" stop-color="#ff6fcf"/></linearGradient>
+<linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc2f0"/><stop offset="1" stop-color="#ff6fcf"/></linearGradient>
+</defs>
+<symbol id="logo" viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="18" fill="url(#gl)"/><rect x="9" y="14" width="4" height="6" rx="2" fill="#ffffff55"/><rect x="9" y="29" width="4" height="6" rx="2" fill="#ffffff55"/><rect x="9" y="44" width="4" height="6" rx="2" fill="#ffffff55"/><path d="M26 20.5v23a2 2 0 0 0 3 1.7l18-11.5a2 2 0 0 0 0-3.4L29 18.8a2 2 0 0 0-3 1.7z" fill="url(#gp)"/><circle cx="50" cy="50" r="9" fill="#ff8ad8" stroke="#06070d" stroke-width="3"/><path d="M46.5 53.5l.8-2.6 4.4-4.4 1.8 1.8-4.4 4.4z" fill="#240a22"/></symbol>
+<symbol id="r0" viewBox="0 0 24 24"><path d="M12 3C7.6 3 4 6 4 10c0 2.4 1.2 4.2 3 5.4V19a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-3.6c1.8-1.2 3-3 3-5.4 0-4-3.6-7-8-7z"/><circle cx="9" cy="11" r="1.5" fill="currentColor"/><circle cx="15" cy="11" r="1.5" fill="currentColor"/><path d="M12 14v2M10 20v-2M14 20v-2"/></symbol>
+<symbol id="r1" viewBox="0 0 24 24"><g transform="rotate(180 12 12)"><path d="M7 11l4-8c1.7 0 3 1.3 3 3v3h5.3a2 2 0 0 1 2 2.3l-1.2 6.4a2 2 0 0 1-2 1.7H7"/><path d="M4 11h3v10H4a1 1 0 0 1-1-1V12a1 1 0 0 1 1-1z"/></g></symbol>
+<symbol id="r2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 15.5h8"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></symbol>
+<symbol id="r3" viewBox="0 0 24 24"><path d="M7 11l4-8c1.7 0 3 1.3 3 3v3h5.3a2 2 0 0 1 2 2.3l-1.2 6.4a2 2 0 0 1-2 1.7H7"/><path d="M4 11h3v10H4a1 1 0 0 1-1-1V12a1 1 0 0 1 1-1z"/></symbol>
+<symbol id="r4" viewBox="0 0 24 24"><path d="M12 2.5l2.8 5.9 6.4.9-4.7 4.5 1.2 6.4L12 17l-5.7 3.2 1.2-6.4L2.8 9.3l6.4-.9z" fill="url(#pg)" stroke="url(#pg)"/><path d="M20 2v3M18.5 3.5h3" stroke-width="1.6"/></symbol>
+<symbol id="film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></symbol>
+</svg>
+<div id="ld"><svg class="lg"><use href="#logo"/></svg><b>ReitFilm Studio</b><div class="bar"><i></i></div></div>
+
+<header>
+<div class="brand"><svg><use href="#logo"/></svg>ReitFilm <small>Studio</small></div>
+<div class="stat" id="st"></div><div class="sp"></div>
+<button class="btn sq" id="bOpen">Open reviews.txt</button>
+<button class="btn sq" id="bBulk">Bulk add</button>
+<button class="btn sq" id="bAuto" title="Fill empty tag sets with suggestions">Auto-tag empty</button>
+<button class="btn pk sq" id="bExp">Export reviews.txt</button>
+<input type="file" id="fi" accept=".txt,text/plain" hidden>
+</header>
+<div id="wrap">
+<section id="left">
+<div class="srch"><input class="fld" id="sq" placeholder="Search TMDB to add a movie" autocomplete="off"><div id="res" hidden></div></div>
+<div class="tabs" id="tabs"></div>
+<div id="list"></div>
+</section>
+<section id="right"></section>
+</div>
+<div id="md" hidden></div>
+<div id="toast"></div>
+
+<script>
+const TOKEN='eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3NDE5NDYyZTA5Yjk2ZTBiNmMyMTQ1NjFkMjhmZTVkOCIsIm5iZiI6MTc5NTQ5MzU2My4wMDQ5OTk5LCJzdWIiOiI2YjA1MGViYmQ2NzliM2MxODU3YWNiYjciLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.0EIA1yh1EY33Bwqd_TxHAc0F9utZpsG36znx0QXtuoU';
+const API='https://api.themoviedb.org/3';
+const tmdb=async p=>{const r=await fetch(API+p,{headers:{Authorization:'Bearer '+TOKEN,accept:'application/json'}});if(!r.ok)throw new Error(r.status);return r.json()};
+/* shared tag dictionary: APPEND ONLY (index = position). Must match index.html */
+const TAGS=[['Action','g'],['Adventure','g'],['Animation','g'],['Comedy','g'],['Crime','g'],['Documentary','g'],['Drama','g'],['Family','g'],['Fantasy','g'],['History','g'],['Horror','g'],['Music','g'],['Mystery','g'],['Romance','g'],['Sci-Fi','g'],['Thriller','g'],['War','g'],['Western','g'],['Classic','e'],['90s','e'],['2000s','e'],['2010s','e'],['2020s','e'],['Short','f'],['Long Haul','f'],['Hidden Gem','v'],['Acclaimed','v'],['Crowd Pleaser','v'],['Foreign','f'],['Franchise','f'],['Based on Book','f'],['Dark','v'],['Feel Good','v'],['Mind-Bender','v'],['Slow Burn','v'],['Spectacle','v'],['Family Night','v'],['Date Night','v'],['Tearjerker','v'],['Superhero','f'],['Twist Ending','v'],['True Story','f'],['Cult','v'],['Low Budget','f'],['Gory','v'],['Heist','f'],['Coming of Age','f'],['Time Travel','f'],['Space','f'],['Dystopian','f'],['80s','e']];
+const GROUPS={g:'Genre',e:'Era',f:'Format',v:'Vibe'};
+const TI={};TAGS.forEach((t,i)=>TI[t[0]]=i);
+const GM={28:0,12:1,16:2,35:3,80:4,99:5,18:6,10751:7,14:8,36:9,27:10,10402:11,9648:12,10749:13,878:14,53:15,10752:16,37:17};
+const A='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const RT=[{n:'DO NOT WATCH',c:'#ff3d6e',k:'dnw'},{n:'Bad',c:'#ff8a4c'},{n:'Mediocre',c:'#9aa4d0'},{n:'Good',c:'#4da3ff'},{n:'MUST WATCH',c:'#ff8ad8'}];
+const cl=s=>String(s).toLowerCase().replace(/[^a-z0-9 \-]/g,'').trim().slice(0,24);
+function parse(t){const m=new Map();for(const ln of t.split(/\r?\n/)){if(!ln||ln[0]=='#')continue;const p=ln.split('|');if(p.length<2||!p[1])continue;const id=parseInt(p[0],36),r=+p[1][0];if(!id||!(r>=0&&r<=4))continue;m.set(id,{id,r,tags:[...new Set([...p[1].slice(1)].map(c=>A.indexOf(c)).filter(i=>i>=0&&i<TAGS.length))],custom:(p[2]||'').split(',').map(cl).filter(Boolean),note:p.slice(3).join('|').replace(/[\u0000-\u001f]/g,' ').trim().slice(0,600)})}return m}
+function ser(e){const t=e.tags.slice().sort((a,b)=>a-b).map(i=>A[i]).join(''),c=e.custom.join(','),n=(e.note||'').replace(/[\u0000-\u001f]+/g,' ').replace(/\|/g,'/').trim().slice(0,600);let s=e.id.toString(36)+'|'+e.r+t;if(n)s+='|'+c+'|'+n;else if(c)s+='|'+c;return s}
+/* algorithmic tagger */
+function autoTag(d){const s=new Set(),a=n=>s.add(TI[n]),g=new Set((d.genres||[]).map(x=>x.id)),G=id=>g.has(id),kw=((d.keywords&&(d.keywords.keywords||d.keywords.results))||[]).map(k=>k.name.toLowerCase()),has=(...w)=>kw.some(k=>w.some(x=>k.includes(x)));
+(d.genres||[]).forEach(x=>GM[x.id]!=null&&s.add(GM[x.id]));
+const y=+(d.release_date||'0').slice(0,4),rt=d.runtime||0,v=d.vote_average||0,vc=d.vote_count||0,pop=d.popularity||0,bud=d.budget||0,rev=d.revenue||0;
+if(y)a(y<1980?'Classic':y<1990?'80s':y<2000?'90s':y<2010?'2000s':y<2020?'2010s':'2020s');
+if(rt&&rt<90)a('Short');if(rt>=150)a('Long Haul');
+if(v>=7.6&&vc>=1500)a('Acclaimed');if(v>=7&&vc>=150&&vc<3000)a('Hidden Gem');if(vc>=6000&&pop>40)a('Crowd Pleaser');
+if(d.original_language&&d.original_language!=='en')a('Foreign');if(d.belongs_to_collection)a('Franchise');
+if(has('based on novel','based on book','short story','young adult'))a('Based on Book');
+if(has('superhero','based on comic'))a('Superhero');if(has('twist ending','plot twist'))a('Twist Ending');
+if(has('true story','biography'))a('True Story');if(has('cult film'))a('Cult');if(has('heist','robbery'))a('Heist');
+if(has('coming of age'))a('Coming of Age');if(has('time travel','time loop'))a('Time Travel');
+if(has('time travel','time loop','dream','psychological','nonlinear','parallel world','simulation','alternate reality'))a('Mind-Bender');
+if(has('outer space','space travel','spacecraft','astronaut','space station'))a('Space');
+if(has('dystopia','post-apocalyptic','totalitarian'))a('Dystopian');if(has('gore','slasher','splatter','body horror'))a('Gory');
+if(G(18)&&has('tearjerker','terminal illness','grief','death of'))a('Tearjerker');
+if(G(27)||((G(53)||G(80)||G(10752))&&has('murder','serial killer','revenge','violence','torture','psychopath'))||has('dark'))a('Dark');
+if(((G(35)||G(10751)||G(10749)||G(10402))&&!G(27)&&!G(53)&&!G(80)&&v>=6.4)||has('feel good','feel-good'))a('Feel Good');
+if((G(18)&&rt>=125&&!G(28)&&!G(12)&&!G(27))||has('slow burn'))a('Slow Burn');
+if(bud>=120e6||((G(878)||G(14)||G(12)||G(28))&&rev>=600e6))a('Spectacle');
+if(G(10751)||(G(16)&&!G(27)))a('Family Night');if(G(10749)&&!G(27))a('Date Night');
+if(bud>0&&bud<5e6&&y>=1990)a('Low Budget');
+return[...s].sort((a,b)=>a-b)}
+const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ico=(n)=>`<svg class="i"><use href="#${n}"/></svg>`;
+let tT;const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>e.classList.remove('on'),2600)};
+/* storage: details in IndexedDB, draft in localStorage */
+const idb=new Promise((res,rej)=>{const q=indexedDB.open('reitfilm-studio',1);q.onupgradeneeded=()=>q.result.createObjectStore('details',{keyPath:'id'});q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)});
+const tx=(m,fn)=>idb.then(d=>new Promise((res,rej)=>{const t=d.transaction('details',m),r=fn(t.objectStore('details'));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)}));
+const iu=new Map();
+async function img(p,size){const u=`https://image.tmdb.org/t/p/${size}${p}`;if(iu.has(u))return iu.get(u);let out=u;try{const c=await caches.open('rf-img');let r=await c.match(u);if(!r){r=await fetch(u);if(r.ok)await c.put(u,r.clone());else return u}out=URL.createObjectURL(await r.blob())}catch(e){}iu.set(u,out);return out}
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const el=e.target;img(el.dataset.p,el.dataset.z||'w342').then(u=>{el.innerHTML=`<img alt="" src="${u}">`})}),{rootMargin:'300px'});
+const hy=(root=document)=>$$('[data-p]:not([data-o])',root).forEach(el=>{el.dataset.o=1;if(el.dataset.p)io.observe(el)});
+/* state */
+const E={list:[],sel:null,tab:'all',det:new Map(),q:''};
+const key=e=>e.id;
+const stOf=e=>e.r<0?'u':e.isNew?'n':ser(e)!==e.orig?'e':'';
+let sT;const save=()=>{clearTimeout(sT);sT=setTimeout(()=>{try{localStorage.rf_draft=JSON.stringify(E.list.map(e=>({id:e.id,r:e.r,tags:e.tags,custom:e.custom,note:e.note,isNew:e.isNew,orig:e.orig})))}catch(x){}},400);stats()};
+async function fetchDet(id,force){let d=E.det.get(id);if(d&&!force)return d;if(!force){d=await tx('readonly',s=>s.get(id));if(d&&d.auto){E.det.set(id,d);return d}}
+for(let k=0;k<3;k++){try{const j=await tmdb(`/movie/${id}?append_to_response=keywords,credits`);d={id,title:j.title,year:(j.release_date||'').slice(0,4),poster:j.poster_path,overview:j.overview,runtime:j.runtime,genres:(j.genres||[]).map(g=>g.name),vote:j.vote_average,dir:((j.credits&&j.credits.crew)||[]).filter(c=>c.job==='Director').map(c=>c.name).slice(0,2).join(', '),auto:autoTag(j)};E.det.set(id,d);tx('readwrite',s=>s.put(d));return d}catch(e){if(e.message==='404'){d={id,title:'Unknown #'+id,year:'',genres:[],auto:[]};E.det.set(id,d);return d}await new Promise(r=>setTimeout(r,800*(k+1)))}}return null}
+async function pool(items,n,fn){let i=0;await Promise.all(Array.from({length:n},async()=>{while(i<items.length){const x=items[i++];await fn(x)}}))}
+/* list + panel */
+function stats(){const c={n:0,e:0,u:0};E.list.forEach(e=>{const s=stOf(e);if(s)c[s]++});$('#st').innerHTML=`<span><b>${E.list.length}</b> total</span><span><b>${c.n}</b> new</span><span><b>${c.e}</b> edited</span><span><b style="color:${c.u?'var(--p)':'inherit'}">${c.u}</b> unrated</span>`;
+$('#tabs').innerHTML=[['all','All'],['n','New'],['e','Edited'],['u','Unrated']].map(t=>`<button class="pill sq ${E.tab===t[0]?'on':''}" data-tab="${t[0]}">${t[1]}</button>`).join('')}
+function renderList(){const q=E.q.toLowerCase();const l=E.list.filter(e=>{const s=stOf(e);if(E.tab==='n'&&!(e.isNew))return false;if(E.tab==='e'&&s!=='e')return false;if(E.tab==='u'&&s!=='u')return false;if(q){const d=E.det.get(e.id);if(!(d&&d.title.toLowerCase().includes(q)))return false}return true}).reverse();
+$('#list').innerHTML=l.map(e=>{const d=E.det.get(e.id),s=stOf(e),R=RT[e.r];return `<button class="li sq ${E.sel===e.id?'on':''}" data-id="${e.id}"><div class="th" ${d&&d.poster?`data-p="${esc(d.poster)}" data-z="w92"`:''}></div><div class="tt"><b>${d?esc(d.title):'Loading #'+e.id}</b><small>${d?esc(d.year):''}${e.isNew?'<span class="dot n">NEW</span>':s==='e'?'<span class="dot e">EDITED</span>':''}</small></div>${R?`<span class="rb" style="--c:${R.c}" title="${R.n}">${ico('r'+e.r)}</span>`:'<small>unrated</small>'}</button>`}).join('')||'<div class="empty"><p>Nothing here yet.</p></div>';hy($('#list'));stats()}
+function renderPanel(){const e=E.list.find(x=>x.id===E.sel),p=$('#right');
+if(!e){p.innerHTML=`<div class="empty">${ico('film')}<h2>Pick a movie or search to add one</h2><p>Keys 1 to 5 set the rating. J and K move through the list.</p></div>`;return}
+const d=E.det.get(e.id)||{title:'Loading…',genres:[],auto:[]};
+const tg=Object.keys(GROUPS).map(g=>`<h3>${GROUPS[g]}</h3><div class="tg">${TAGS.map((t,i)=>t[1]===g?`<button class="tag sq ${e.tags.includes(i)?'on':d.auto.includes(i)?'sg':''}" data-t="${i}">${esc(t[0])}</button>`:'').join('')}</div>`).join('');
+const missing=d.auto.filter(i=>!e.tags.includes(i)).length;
+p.innerHTML=`<div class="ed"><div><div class="po" ${d.poster?`data-p="${esc(d.poster)}" data-z="w342"`:''}></div></div><div>
+<h2>${esc(d.title)}</h2><div class="meta">${esc([d.year,d.runtime?d.runtime+' min':'',d.dir,(d.genres||[]).join(', ')].filter(Boolean).join('  \u2022  '))}</div><p class="ov">${esc(d.overview||'')}</p>
+<h3>Rating</h3><div class="rs">${RT.map((x,i)=>`<button class="rt sq ${e.r===i?'on':''}" data-r="${i}" style="--c:${x.c}">${ico('r'+i)}${x.n}<small style="opacity:.6">${i+1}</small></button>`).join('')}</div>
+<h3>Tags <button class="btn sq" data-a="apply" style="padding:5px 12px;font-size:12px">Add ${missing} suggested</button><button class="btn sq" data-a="reset" style="padding:5px 12px;font-size:12px">Reset to auto</button><button class="btn sq" data-a="refetch" style="padding:5px 12px;font-size:12px">Refresh data</button></h3>
+<small style="color:var(--m)">Dashed pink = suggested by the algorithm from genre, era, runtime, ratings and TMDB keywords.</small>${tg}
+<h3>Custom tags</h3><div class="tg">${e.custom.map(c=>`<button class="tag cu on sq" data-c="${esc(c)}">#${esc(c)} ×</button>`).join('')}<input class="fld" id="ci" placeholder="Type and press Enter" style="width:210px;padding:7px 12px" maxlength="24"></div>
+<h3>Review note <span id="cc" style="margin-left:auto">${e.note.length}/600</span></h3><textarea class="fld" id="nt" maxlength="600" placeholder="Your take (optional)">${esc(e.note)}</textarea>
+<div style="margin-top:18px"><button class="btn sq" data-a="del" style="color:#ff6b8f">Remove from reviews</button></div></div></div>`;hy(p)}
+function select(id){E.sel=id;renderList();renderPanel();const b=$(`.li[data-id="${id}"]`);b&&b.scrollIntoView({block:'nearest'})}
+function touch(){save();renderList()}
+/* add */
+async function addMovie(id,r=-1,note=''){if(E.list.some(e=>e.id===id)){select(id);toast('Already in your reviews');return null}
+const d=await fetchDet(id);if(!d){toast('TMDB request failed. Try again.');return null}
+const e={id,r,tags:d.auto.slice(),custom:[],note,isNew:true,orig:''};E.list.push(e);return e}
+let sT2;$('#sq').oninput=ev=>{clearTimeout(sT2);const q=ev.target.value.trim(),res=$('#res');if(q.length<2){res.hidden=true;return}
+sT2=setTimeout(async()=>{try{const j=await tmdb('/search/movie?include_adult=false&query='+encodeURIComponent(q));const rs=j.results.slice(0,7);res.hidden=false;
+res.innerHTML=rs.map(m=>`<button class="rr" data-add="${m.id}">${m.poster_path?`<img alt="" src="https://image.tmdb.org/t/p/w92${m.poster_path}">`:'<i></i>'}<span><b>${esc(m.title)}</b><small>${esc((m.release_date||'').slice(0,4))} \u2022 ${m.vote_count} votes</small></span></button>`).join('')||'<div class="rr">No results</div>'}catch(e){toast('Search failed')}},280)};
+/* bulk */
+const ratingOf=s=>{s=(s||'').trim().toLowerCase();if(/^[0-4]$/.test(s))return+s;if(!s)return-1;if(/^(dnw|do not|never)/.test(s))return 0;if(s.startsWith('bad'))return 1;if(/^(med|mid|meh|ok)/.test(s))return 2;if(s.startsWith('good'))return 3;if(s.startsWith('must'))return 4;return-1};
+function bulkUI(){const m=$('#md');m.hidden=false;m.innerHTML=`<div class="sheet"><h2>Bulk add movies</h2><small style="color:var(--m)">One per line. Use a title, "Title (year)", a TMDB id, or an IMDb id (tt...). Optional: add "| rating | note" where rating is 0 to 4 or dnw, bad, mid, good, must.</small><textarea class="fld" id="bt" style="min-height:200px" placeholder="Inception (2010) | 4 | Mind melting&#10;Cats (2019) | 0&#10;603&#10;tt0111161 | must"></textarea><div id="log"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn sq" data-a="bclose">Close</button><button class="btn pr sq" id="bgo">Add all</button></div></div>`;
+$('#bgo').onclick=async()=>{const lines=$('#bt').value.split('\n').map(s=>s.trim()).filter(Boolean),log=$('#log');log.innerHTML='';let ok=0;const say=(t,c)=>{const d=document.createElement('div');d.className=c;d.textContent=t;log.append(d)};
+await pool(lines,4,async ln=>{const [t0,rs,...ns]=ln.split('|'),t=t0.trim();try{let id=0;
+if(/^\d+$/.test(t))id=+t;else if(/^tt\d+$/.test(t)){const j=await tmdb(`/find/${t}?external_source=imdb_id`);id=j.movie_results[0]&&j.movie_results[0].id}else{const ym=t.match(/^(.*?)\s*\((\d{4})\)$/),n=ym?ym[1]:t;const j=await tmdb(`/search/movie?include_adult=false&query=${encodeURIComponent(n)}${ym?'&year='+ym[2]:''}`);id=j.results[0]&&j.results[0].id}
+if(!id)return say('Not found: '+t,'no');const e=await addMovie(id,ratingOf(rs),ns.join('|').trim());if(e){ok++;say('Added: '+E.det.get(id).title,'ok')}else say('Skipped: '+t,'no')}catch(x){say('Failed: '+t,'no')}});
+say(`Done. ${ok} added.`,'ok');renderList();if(ok)save()}}
+/* export */
+function exportTxt(){const rated=E.list.filter(e=>e.r>=0),skip=E.list.length-rated.length;const txt='#RF1\n'+rated.map(ser).join('\n')+'\n';
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='reviews.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+rated.forEach(e=>{e.orig=ser(e);e.isNew=false});save();renderList();toast(`Exported ${rated.length} reviews (${(new Blob([txt]).size/1024).toFixed(1)} KB)${skip?`. ${skip} unrated skipped`:''}`)}
+/* load */
+async function load(txt,fromDraft){const m=parse(txt);E.list=[...m.values()].map(e=>({...e,isNew:false,orig:ser(e)}));await afterLoad()}
+async function afterLoad(){E.sel=E.list.length?E.list[E.list.length-1].id:null;renderList();renderPanel();stats();
+pool(E.list.map(e=>e.id),6,async id=>{if(!E.det.has(id)){await fetchDet(id);renderList();if(E.sel===id)renderPanel()}})}
+/* events */
+document.addEventListener('click',async ev=>{const t=ev.target;let b;
+if(!t.closest('.srch'))$('#res').hidden=true;
+if(b=t.closest('[data-add]')){$('#res').hidden=true;$('#sq').value='';const e=await addMovie(+b.dataset.add);if(e){E.tab='all';E.q='';select(e.id);save();toast('Added. Set a rating.')}return}
+if(b=t.closest('[data-tab]')){E.tab=b.dataset.tab;renderList();return}
+if(b=t.closest('.li'))return select(+b.dataset.id);
+const e=E.list.find(x=>x.id===E.sel);
+if(b=t.closest('[data-r]')){if(e){e.r=+b.dataset.r;touch();renderPanel()}return}
+if(b=t.closest('[data-t]')){if(e){const i=+b.dataset.t,k=e.tags.indexOf(i);k>=0?e.tags.splice(k,1):e.tags.push(i);touch();renderPanel()}return}
+if(b=t.closest('[data-c]')){if(e){e.custom=e.custom.filter(c=>c!==b.dataset.c);touch();renderPanel()}return}
+if(b=t.closest('[data-a]')){const a=b.dataset.a;
+if(a==='bclose'){$('#md').hidden=true;$('#md').innerHTML='';return}
+if(!e)return;const d=E.det.get(e.id)||{auto:[]};
+if(a==='apply'){e.tags=[...new Set([...e.tags,...d.auto])]}
+else if(a==='reset'){e.tags=d.auto.slice()}
+else if(a==='refetch'){await fetchDet(e.id,true);toast('Refreshed from TMDB')}
+else if(a==='del'){if(!confirm('Remove this movie from the reviews?'))return;E.list=E.list.filter(x=>x!==e);E.sel=null}
+touch();renderPanel()}});
+document.addEventListener('input',ev=>{const t=ev.target,e=E.list.find(x=>x.id===E.sel);if(t.id==='nt'&&e){e.note=t.value;$('#cc').textContent=t.value.length+'/600';save()}});
+document.addEventListener('keydown',ev=>{const t=ev.target,e=E.list.find(x=>x.id===E.sel);
+if(t.id==='ci'&&ev.key==='Enter'&&e){const c=cl(t.value);if(c&&!e.custom.includes(c)){e.custom.push(c);touch();renderPanel();$('#ci').focus()}return}
+if(/INPUT|TEXTAREA|SELECT/.test(t.tagName))return;
+if(ev.key>='1'&&ev.key<='5'&&e){e.r=+ev.key-1;touch();renderPanel()}
+if(ev.key==='j'||ev.key==='k'){const ids=$$('.li').map(x=>+x.dataset.id),i=ids.indexOf(E.sel),n=ids[i+(ev.key==='j'?1:-1)];if(n)select(n)}
+if(ev.key==='Escape'){$('#md').hidden=true}});
+$('#bOpen').onclick=()=>$('#fi').click();
+$('#fi').onchange=async ev=>{const f=ev.target.files[0];if(f){await load(await f.text());toast('Loaded '+E.list.length+' reviews')}};
+$('#bBulk').onclick=bulkUI;$('#bExp').onclick=exportTxt;
+$('#bAuto').onclick=()=>{let n=0;E.list.forEach(e=>{const d=E.det.get(e.id);if(d&&!e.tags.length&&d.auto.length){e.tags=d.auto.slice();n++}});touch();renderPanel();toast(n+' entries auto-tagged')};
+$('#left').addEventListener('input',ev=>{if(ev.target.id==='sq')return});
+/* boot */
+(async()=>{await idb;
+let txt=await fetch('reviews.txt',{cache:'no-store'}).then(r=>r.ok?r.text():'').catch(()=>'');
+await load(txt);
+try{const dr=JSON.parse(localStorage.rf_draft||'null');if(dr&&dr.length&&JSON.stringify(dr.map(e=>e.id))!==JSON.stringify(E.list.map(e=>e.id))||dr&&dr.some(e=>e.isNew)){if(confirm('Restore your unsaved draft from last time? (Cancel loads reviews.txt as-is)')){E.list=dr.map(e=>({...e,custom:e.custom||[],tags:e.tags||[],note:e.note||''}));await afterLoad()}}}catch(e){}
+if(!E.list.length)toast('No reviews.txt found. Use Open, or search to start fresh.');
+setTimeout(()=>{$('#ld').classList.add('gone');setTimeout(()=>$('#ld').remove(),600)},200)})();
+</script>
+</body>
+</html>

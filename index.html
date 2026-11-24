@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06070d">
+<title>ReitFilm</title>
+<link id="fav" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='18' fill='%232f5bff'/%3E%3Cpath d='M26 20.5v23a2 2 0 0 0 3 1.7l18-11.5a2 2 0 0 0 0-3.4L29 18.8a2 2 0 0 0-3 1.7z' fill='%23ff8ad8'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--bg:#06070d;--s1:#0c1020;--s2:#131937;--s3:#1b2350;--b:#3b82ff;--b2:#6aa8ff;--p:#ff8ad8;--t:#e9edff;--m:#8a93b8;--sp:cubic-bezier(.34,1.8,.5,1)}
+html{color-scheme:dark}
+body{font:500 15px/1.4 ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(60vw 50vh at 0 0,#16337a66,transparent),radial-gradient(50vw 50vh at 100% 100%,#ff8ad81f,transparent),radial-gradient(40vw 40vh at 80% 0,#2a1a6a40,transparent)}
+button,input,select{font:inherit;color:inherit;border:0;background:none}
+button{cursor:pointer}
+[hidden]{display:none!important}
+.i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sq{transition:transform .45s var(--sp),background .25s,box-shadow .3s,opacity .2s,border-color .25s}
+.sq:hover{transform:scale(1.04)}.sq:active{transform:scale(.92,.86)}
+:focus-visible{outline:2px solid var(--p);outline-offset:2px}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#26305f;border-radius:9px}
+/* loader */
+#ld{position:fixed;inset:0;z-index:99;background:var(--bg);display:grid;place-content:center;justify-items:center;gap:22px;transition:opacity .45s,visibility .45s}
+#ld.gone{opacity:0;visibility:hidden}
+#ld .lg{width:92px;height:92px;animation:jelly 1.3s var(--sp) infinite;filter:drop-shadow(0 12px 30px #3b82ff88)}
+#ld b{font-size:26px;letter-spacing:.5px}
+.bar{width:150px;height:8px;background:var(--s2);border-radius:9px;overflow:hidden}
+.bar i{display:block;width:45%;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--b),var(--p));animation:bar 1s ease-in-out infinite}
+@keyframes bar{0%{transform:translateX(-100%)}100%{transform:translateX(230%)}}
+@keyframes jelly{0%,100%{transform:scale(1)}25%{transform:scale(1.14,.86)}50%{transform:scale(.9,1.1)}75%{transform:scale(1.05,.96)}}
+@keyframes pop{0%{transform:scale(.88,1.1);opacity:0}60%{transform:scale(1.04,.97);opacity:1}100%{transform:none;opacity:1}}
+/* auth */
+#auth{min-height:100vh;display:grid;place-items:center;padding:20px}
+.ac{width:min(420px,100%);background:linear-gradient(160deg,var(--s2),var(--s1));border:1px solid #ffffff14;border-radius:34px;padding:34px 28px;display:grid;gap:16px;text-align:center;box-shadow:0 30px 80px #000a;animation:pop .6s both}
+.ac .lg{width:74px;height:74px;margin:0 auto;animation:jelly 3s var(--sp) infinite}
+.ac h1{font-size:30px}.ac p{color:var(--m)}
+.fld{background:#0a0e22;border:2px solid #ffffff10;border-radius:18px;padding:14px 16px;width:100%;outline:0;transition:border-color .2s,transform .4s var(--sp)}
+.fld:focus{border-color:var(--b);transform:scale(1.02)}
+.btn{background:linear-gradient(135deg,var(--b),#6a5cff);border-radius:18px;padding:14px 20px;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center;box-shadow:0 8px 24px #3b82ff55}
+.btn.pk{background:linear-gradient(135deg,var(--p),#c77dff);box-shadow:0 8px 24px #ff8ad855;color:#240a22}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pf{display:flex;align-items:center;gap:8px;background:var(--s2);border-radius:99px;padding:6px 14px 6px 6px}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(135deg,hsl(var(--h) 90% 60%),hsl(calc(var(--h) + 50) 90% 55%));flex:none}
+.err{color:#ff6b8f;min-height:1.2em;font-size:13px}
+/* app */
+#app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+#nv{position:sticky;top:0;height:100vh;padding:22px 16px;display:flex;flex-direction:column;gap:6px;background:#080b18cc;border-right:1px solid #ffffff0d}
+#nv .brand{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:800;padding:4px 8px 20px}
+#nv .brand svg{width:38px;height:38px}
+.nb{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;color:var(--m);font-weight:700;text-align:left}
+.nb:hover{color:var(--t);background:var(--s2)}
+.nb.on{background:linear-gradient(135deg,#2c4fd6,#5a3fd6);color:#fff;box-shadow:0 8px 22px #3b4fff44}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px;background:var(--s1);border-radius:20px}
+.me span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.me button{color:var(--m);padding:6px;border-radius:12px}.me button:hover{color:var(--p)}
+main{padding:34px clamp(16px,3vw,44px) 90px;min-width:0}
+.hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;margin-bottom:30px}
+.hero h1{font-size:clamp(30px,4.4vw,52px);line-height:1.05;letter-spacing:-.5px}
+.hero p{color:var(--m);margin-top:8px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.st{background:var(--s2);border-radius:22px;padding:14px 20px;min-width:104px}
+.st b{display:block;font-size:28px;line-height:1.1}.st small{color:var(--m)}
+.st.pk b{color:var(--p)}.st.bl b{color:var(--b2)}
+.r5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:34px}
+.rc{background:var(--s1);border:2px solid color-mix(in srgb,var(--c) 30%,transparent);border-radius:26px;padding:16px 14px;display:grid;gap:4px;justify-items:start;text-align:left;color:var(--c)}
+.rc:hover{background:color-mix(in srgb,var(--c) 14%,var(--s1));box-shadow:0 10px 30px color-mix(in srgb,var(--c) 25%,transparent)}
+.rc .i{width:34px;height:34px}.rc b{font-size:26px;color:var(--t)}.rc small{font-weight:700;font-size:12px}
+.row{margin-bottom:32px}
+.rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.rh h2{font-size:22px}.rh button{color:var(--b2);font-weight:700;padding:6px 12px;border-radius:99px}.rh button:hover{background:var(--s2)}
+.rs{display:flex;gap:16px;overflow-x:auto;padding:6px 4px 16px;scroll-snap-type:x proximity}
+.rs .card{width:158px;flex:none;scroll-snap-align:start}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
+.card{cursor:pointer;animation:pop .5s both;animation-delay:calc(var(--i,0)*22ms);transition:transform .45s var(--sp)}
+.card:hover{transform:translateY(-6px) scale(1.04)}.card:active{transform:scale(.92,.88)}
+.po{position:relative;aspect-ratio:2/3;border-radius:22px;background:linear-gradient(160deg,var(--s3),var(--s1));overflow:hidden;box-shadow:0 12px 28px #0008}
+.po img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+.po.ld img{opacity:1}
+.np{position:absolute;inset:0;display:grid;place-items:center;padding:12px;text-align:center;color:var(--m);font-weight:700}
+.rb{position:absolute;top:8px;left:8px;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:#06070dd9;color:var(--c);backdrop-filter:blur(6px);border:1.5px solid color-mix(in srgb,var(--c) 55%,transparent)}
+.sn{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--b);color:#fff}
+.sn .i{width:17px;height:17px}.sn.lk{background:var(--p);color:#2a0b28}.sn.dis{background:#5b6290}
+.ct{margin-top:9px;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cy{color:var(--m);font-size:13px}
+.sk{display:block;height:14px;width:80%;border-radius:8px;background:linear-gradient(90deg,var(--s2),var(--s3),var(--s2));background-size:200%;animation:sh 1.2s linear infinite}
+@keyframes sh{to{background-position:-200%}}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 24px}
+.sb{display:flex;align-items:center;gap:8px;background:var(--s2);border-radius:99px;padding:0 16px;flex:1 1 220px;max-width:340px;color:var(--m)}
+.sb input{outline:0;padding:12px 0;width:100%;color:var(--t)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:99px;background:var(--s2);color:var(--m);font-weight:700;font-size:13px;border:2px solid transparent}
+.pill.on{color:var(--c,#fff);border-color:var(--c,var(--b));background:color-mix(in srgb,var(--c,var(--b)) 16%,var(--s1))}
+select{background:var(--s2);border-radius:99px;padding:10px 14px;font-weight:700;font-size:13px;outline:0;max-width:170px}
+select option{background:var(--s1)}
+.empty{padding:70px 20px;text-align:center;color:var(--m);display:grid;gap:10px;justify-items:center}
+.empty .i{width:54px;height:54px;color:var(--p)}
+/* modal */
+#md{position:fixed;inset:0;z-index:50;background:#02030acc;backdrop-filter:blur(10px);display:grid;place-items:center;padding:16px;animation:fd .25s}
+@keyframes fd{from{opacity:0}}
+.sheet{position:relative;width:min(860px,100%);max-height:92vh;overflow:auto;background:var(--s1);border-radius:36px;border:1px solid #ffffff14;animation:pop .55s both;box-shadow:0 40px 100px #000c,0 0 80px color-mix(in srgb,var(--c) 22%,transparent)}
+.bd{height:210px;background:var(--s3) center/cover;position:relative}
+.bd:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,var(--s1))}
+.x{position:absolute;top:14px;right:14px;z-index:3;width:42px;height:42px;border-radius:50%;background:#06070dbb;display:grid;place-items:center}
+.mb{display:grid;grid-template-columns:190px 1fr;gap:26px;padding:0 30px 30px;margin-top:-100px;position:relative;z-index:2}
+.mp{width:190px}
+.mi{padding-top:100px;display:grid;gap:12px;align-content:start}
+.vd{display:inline-flex;align-items:center;gap:10px;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);border:2px solid color-mix(in srgb,var(--c) 50%,transparent);padding:8px 16px 8px 12px;border-radius:99px;font-weight:800;width:fit-content;letter-spacing:.3px}
+.vd .i{width:26px;height:26px}
+.mi h2{font-size:clamp(24px,3.4vw,36px);line-height:1.1}
+.meta{color:var(--m)}
+.tg{display:flex;flex-wrap:wrap;gap:6px}
+.tg span{background:var(--s2);padding:4px 11px;border-radius:99px;font-size:12.5px;font-weight:700;color:var(--b2)}
+.tg span.c{color:var(--p)}
+.note{background:linear-gradient(135deg,#1b2350,#241a45);border-radius:22px;padding:14px 18px;border-left:5px solid var(--c)}
+.note small{color:var(--m);display:block;margin-bottom:2px}
+.ov{color:#c4cbea;max-width:62ch}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.ab{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:99px;background:var(--s2);font-weight:800;color:var(--m)}
+.ab.on{color:#fff;background:var(--b);box-shadow:0 8px 22px #3b82ff55}
+.ab.lk.on{background:var(--p);color:#2a0b28;box-shadow:0 8px 22px #ff8ad855}
+.ab.dl.on{background:#5b6290;box-shadow:none}
+#toast{position:fixed;bottom:84px;left:50%;transform:translate(-50%,30px);background:var(--s3);padding:12px 20px;border-radius:99px;opacity:0;transition:.4s var(--sp);z-index:90;pointer-events:none;font-weight:700}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:860px){
+#app{grid-template-columns:1fr}
+#nv{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;z-index:40;flex-direction:row;justify-content:space-around;padding:8px 10px calc(8px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid #ffffff14;background:#080b18f2;backdrop-filter:blur(14px)}
+#nv .brand,.me span{display:none}.me{margin:0;padding:4px;background:none}
+.nb{flex-direction:column;gap:2px;font-size:11px;padding:8px 14px}
+.hero{grid-template-columns:1fr}.r5{grid-template-columns:repeat(2,1fr)}
+.mb{grid-template-columns:1fr;margin-top:-70px;padding:0 20px 24px}.mp{width:130px}.mi{padding-top:0}
+.rs .card{width:130px}.grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f8bff"/><stop offset="1" stop-color="#2a2fd6"/></linearGradient>
+<linearGradient id="gp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3ec"/><stop offset="1" stop-color="#ff6fcf"/></linearGradient>
+<linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc2f0"/><stop offset="1" stop-color="#ff6fcf"/></linearGradient>
+</defs>
+<symbol id="logo" viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="18" fill="url(#gl)"/><rect x="9" y="14" width="4" height="6" rx="2" fill="#ffffff55"/><rect x="9" y="29" width="4" height="6" rx="2" fill="#ffffff55"/><rect x="9" y="44" width="4" height="6" rx="2" fill="#ffffff55"/><path d="M26 20.5v23a2 2 0 0 0 3 1.7l18-11.5a2 2 0 0 0 0-3.4L29 18.8a2 2 0 0 0-3 1.7z" fill="url(#gp)"/></symbol>
+<symbol id="r0" viewBox="0 0 24 24"><path d="M12 3C7.6 3 4 6 4 10c0 2.4 1.2 4.2 3 5.4V19a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-3.6c1.8-1.2 3-3 3-5.4 0-4-3.6-7-8-7z"/><circle cx="9" cy="11" r="1.5" fill="currentColor"/><circle cx="15" cy="11" r="1.5" fill="currentColor"/><path d="M12 14v2M10 20v-2M14 20v-2"/></symbol>
+<symbol id="r1" viewBox="0 0 24 24"><g transform="rotate(180 12 12)"><path d="M7 11l4-8c1.7 0 3 1.3 3 3v3h5.3a2 2 0 0 1 2 2.3l-1.2 6.4a2 2 0 0 1-2 1.7H7"/><path d="M4 11h3v10H4a1 1 0 0 1-1-1V12a1 1 0 0 1 1-1z"/></g></symbol>
+<symbol id="r2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 15.5h8"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></symbol>
+<symbol id="r3" viewBox="0 0 24 24"><path d="M7 11l4-8c1.7 0 3 1.3 3 3v3h5.3a2 2 0 0 1 2 2.3l-1.2 6.4a2 2 0 0 1-2 1.7H7"/><path d="M4 11h3v10H4a1 1 0 0 1-1-1V12a1 1 0 0 1 1-1z"/></symbol>
+<symbol id="r4" viewBox="0 0 24 24"><path d="M12 2.5l2.8 5.9 6.4.9-4.7 4.5 1.2 6.4L12 17l-5.7 3.2 1.2-6.4L2.8 9.3l6.4-.9z" fill="url(#pg)" stroke="url(#pg)"/><path d="M20 2v3M18.5 3.5h3" stroke-width="1.6"/></symbol>
+<symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 20.5S3 15 3 8.8A4.8 4.8 0 0 1 12 6.5a4.8 4.8 0 0 1 9 2.3C21 15 12 20.5 12 20.5z" fill="currentColor"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+<symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="2.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2.5"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="out" viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/></symbol>
+<symbol id="film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></symbol>
+</svg>
+
+<div id="ld"><svg class="lg"><use href="#logo"/></svg><b>ReitFilm</b><div class="bar"><i></i></div></div>
+
+<div id="auth" hidden></div>
+
+<div id="app" hidden>
+<nav id="nv">
+<div class="brand"><svg><use href="#logo"/></svg>ReitFilm</div>
+<button class="nb sq" data-v="home"><svg class="i"><use href="#home"/></svg>Home</button>
+<button class="nb sq" data-v="lib"><svg class="i"><use href="#grid"/></svg>Library</button>
+<button class="nb sq" data-v="seen"><svg class="i"><use href="#check"/></svg>Watched</button>
+<div class="me"><div class="av" id="mav"></div><span id="mnm"></span><button id="so" title="Sign out"><svg class="i"><use href="#out"/></svg></button></div>
+</nav>
+<main id="main"></main>
+</div>
+<div id="md" hidden></div>
+<div id="toast"></div>
+
+<script>
+const TOKEN='eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3NDE5NDYyZTA5Yjk2ZTBiNmMyMTQ1NjFkMjhmZTVkOCIsIm5iZiI6MTc5NTQ5MzU2My4wMDQ5OTk5LCJzdWIiOiI2YjA1MGViYmQ2NzliM2MxODU3YWNiYjciLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.0EIA1yh1EY33Bwqd_TxHAc0F9utZpsG36znx0QXtuoU';
+const API='https://api.themoviedb.org/3';
+const tmdb=async p=>{const r=await fetch(API+p,{headers:{Authorization:'Bearer '+TOKEN,accept:'application/json'}});if(!r.ok)throw new Error(r.status);return r.json()};
+/* shared tag dictionary: APPEND ONLY (index = position) */
+const TAGS=[['Action','g'],['Adventure','g'],['Animation','g'],['Comedy','g'],['Crime','g'],['Documentary','g'],['Drama','g'],['Family','g'],['Fantasy','g'],['History','g'],['Horror','g'],['Music','g'],['Mystery','g'],['Romance','g'],['Sci-Fi','g'],['Thriller','g'],['War','g'],['Western','g'],['Classic','e'],['90s','e'],['2000s','e'],['2010s','e'],['2020s','e'],['Short','f'],['Long Haul','f'],['Hidden Gem','v'],['Acclaimed','v'],['Crowd Pleaser','v'],['Foreign','f'],['Franchise','f'],['Based on Book','f'],['Dark','v'],['Feel Good','v'],['Mind-Bender','v'],['Slow Burn','v'],['Spectacle','v'],['Family Night','v'],['Date Night','v'],['Tearjerker','v'],['Superhero','f'],['Twist Ending','v'],['True Story','f'],['Cult','v'],['Low Budget','f'],['Gory','v'],['Heist','f'],['Coming of Age','f'],['Time Travel','f'],['Space','f'],['Dystopian','f'],['80s','e']];
+const A='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const RT=[{n:'DO NOT WATCH',c:'#ff3d6e'},{n:'Bad',c:'#ff8a4c'},{n:'Mediocre',c:'#9aa4d0'},{n:'Good',c:'#4da3ff'},{n:'MUST WATCH',c:'#ff8ad8'}];
+/* reviews.txt: "#RF1" header, then  base36id|<rating 0-4><tag chars>|custom,tags|note  (trailing empty fields omitted) */
+function parse(t){const m=new Map();for(const ln of t.split(/\r?\n/)){if(!ln||ln[0]=='#')continue;const p=ln.split('|');if(p.length<2||!p[1])continue;const id=parseInt(p[0],36),r=+p[1][0];if(!id||!(r>=0&&r<=4))continue;const tags=[...new Set([...p[1].slice(1)].map(c=>A.indexOf(c)).filter(i=>i>=0&&i<TAGS.length))];const custom=(p[2]||'').split(',').map(s=>s.toLowerCase().replace(/[^a-z0-9 \-]/g,'').trim().slice(0,24)).filter(Boolean);m.set(id,{id,r,tags,custom,note:p.slice(3).join('|').replace(/[\u0000-\u001f]/g,' ').trim().slice(0,600)})}return m}
+/* helpers */
+const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ico=(n,c='')=>`<svg class="i ${c}"><use href="#${n}"/></svg>`;
+let tT;const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>e.classList.remove('on'),2200)};
+/* indexeddb */
+const idb=new Promise((res,rej)=>{const q=indexedDB.open('reitfilm',1);q.onupgradeneeded=()=>{const d=q.result;d.createObjectStore('users',{keyPath:'id',autoIncrement:true});d.createObjectStore('details',{keyPath:'id'});d.createObjectStore('marks',{keyPath:'k'})};q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)});
+const tx=(s,m,fn)=>idb.then(d=>new Promise((res,rej)=>{const t=d.transaction(s,m),r=fn(t.objectStore(s));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)}));
+const get=(s,k)=>tx(s,'readonly',st=>st.get(k)),all=s=>tx(s,'readonly',st=>st.getAll()),put=(s,v)=>tx(s,'readwrite',st=>st.put(v)),del=(s,k)=>tx(s,'readwrite',st=>st.delete(k));
+/* image cache (Cache API) */
+const iu=new Map();
+async function img(p,size){const u=`https://image.tmdb.org/t/p/${size}${p}`;if(iu.has(u))return iu.get(u);let out=u;try{const c=await caches.open('rf-img');let r=await c.match(u);if(!r){r=await fetch(u);if(r.ok)await c.put(u,r.clone());else return u}out=URL.createObjectURL(await r.blob())}catch(e){}iu.set(u,out);return out}
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const el=e.target,p=el.dataset.p;if(p)img(p,'w342').then(u=>{const i=new Image();i.alt='';i.onload=()=>el.classList.add('ld');i.src=u;el.prepend(i)})}),{rootMargin:'400px'});
+const hy=(root=document)=>$$('.po[data-p]:not([data-o])',root).forEach(el=>{el.dataset.o=1;if(el.dataset.p)io.observe(el)});
+/* state */
+const S={user:null,reviews:[],map:new Map(),det:new Map(),marks:new Map(),view:'home',f:{}};
+/* details loader */
+const Q=[];let run=0;
+function loadDetails(){S.reviews.slice().reverse().forEach(r=>{if(!S.det.has(r.id)&&!Q.includes(r.id))Q.push(r.id)});pump()}
+function pump(){while(run<8&&Q.length){run++;fetchDet(Q.shift()).finally(()=>{run--;pump()})}}
+async function fetchDet(id,retry=0){try{const d=await tmdb(`/movie/${id}?append_to_response=credits`);const x={id,title:d.title,year:(d.release_date||'').slice(0,4),poster:d.poster_path,backdrop:d.backdrop_path,overview:d.overview,tagline:d.tagline,runtime:d.runtime,genres:(d.genres||[]).map(g=>g.name),vote:d.vote_average,dir:((d.credits&&d.credits.crew)||[]).filter(c=>c.job==='Director').map(c=>c.name).slice(0,2).join(', ')};S.det.set(id,x);put('details',x);paint(id)}catch(e){if(e.message==='404'){S.det.set(id,{id,title:'Unknown movie #'+id,year:'',genres:[]});paint(id)}else if(retry<2){await new Promise(r=>setTimeout(r,900*(retry+1)));return fetchDet(id,retry+1)}}}
+/* cards */
+function cardHTML(r,i=0){const d=S.det.get(r.id),m=S.marks.get(r.id),R=RT[r.r];
+return `<div class="card" data-id="${r.id}" style="--i:${Math.min(i,20)}"><div class="po" data-p="${d?esc(d.poster||''):''}">${d&&!d.poster?`<span class="np">${esc(d.title)}</span>`:''}<span class="rb" style="--c:${R.c}" title="${R.n}">${ico('r'+r.r)}</span>${m&&m.seen?`<span class="sn ${m.liked>0?'lk':m.liked<0?'dis':''}">${ico(m.liked>0?'heart':m.liked<0?'r1':'eye')}</span>`:''}</div><div class="ct">${d?esc(d.title):'<i class="sk"></i>'}</div><div class="cy">${d?esc(d.year):'&nbsp;'}</div></div>`}
+function paint(id){const r=S.map.get(id);if(!r)return;$$(`.card[data-id="${id}"]`).forEach(c=>{const n=document.createElement('div');n.innerHTML=cardHTML(r);const e=n.firstChild;e.style.animation='none';c.replaceWith(e);hy(e)});if(S.open===id)fillModal(id)}
+/* auth */
+async function hash(p,n){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(n+':'+p));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return p}}
+async function showAuth(sel){const us=await all('users');const a=$('#auth');$('#app').hidden=true;a.hidden=false;
+const u=sel&&us.find(x=>x.id===sel);
+a.innerHTML=`<div class="ac"><svg class="lg"><use href="#logo"/></svg>${u?`<h1>Hi, ${esc(u.name)}</h1><p>Enter your PIN</p><input class="fld" id="pin" type="password" inputmode="numeric" placeholder="PIN" autofocus><div class="err" id="er"></div><button class="btn sq" id="go">Sign in</button><button class="pill sq" id="bk" style="justify-self:center">Back</button>`:`<h1>ReitFilm</h1><p>Every movie, rated honestly. Join to track what you've watched.</p>${us.length?`<div class="chips">${us.map(x=>`<button class="pf sq" data-u="${x.id}"><span class="av" style="--h:${x.hue}">${esc(x.name[0].toUpperCase())}</span>${esc(x.name)}</button>`).join('')}</div><p style="font-size:13px">or create a new profile</p>`:''}<input class="fld" id="nm" maxlength="20" placeholder="Pick a name"><input class="fld" id="pn" type="password" inputmode="numeric" maxlength="12" placeholder="PIN (optional)"><div class="err" id="er"></div><button class="btn pk sq" id="go">Join ReitFilm</button>`}</div>`;
+$$('[data-u]',a).forEach(b=>b.onclick=async()=>{const x=us.find(y=>y.id==b.dataset.u);x.pin?showAuth(x.id):enter(x)});
+const er=m=>$('#er').textContent=m;
+if($('#bk'))$('#bk').onclick=()=>showAuth();
+const go=async()=>{if(u){if(await hash($('#pin').value,u.name.toLowerCase())===u.pin)enter(u);else er('Wrong PIN. Try again.');return}
+const n=$('#nm').value.trim();if(!n)return er('Pick a name first.');if(us.some(x=>x.name.toLowerCase()===n.toLowerCase()))return er('That name is taken on this device.');
+const pv=$('#pn').value;const nu={name:n,pin:pv?await hash(pv,n.toLowerCase()):'',hue:Math.floor(Math.random()*360),created:Date.now()};nu.id=await tx('users','readwrite',st=>st.add(nu));enter(nu)};
+$('#go').onclick=go;a.onkeydown=e=>{if(e.key==='Enter')go()}}
+async function enter(u){S.user=u;localStorage.rf_uid=u.id;S.marks=new Map((await all('marks')).filter(m=>m.uid===u.id).map(m=>[m.id,m]));
+$('#auth').hidden=true;$('#app').hidden=false;$('#mav').textContent=u.name[0].toUpperCase();$('#mav').className='av';$('#mav').style.setProperty('--h',u.hue);$('#mnm').textContent=u.name;go2('home');loadDetails()}
+/* views */
+function go2(v){S.view=v;S.f={r:new Set(),seen:v==='seen'?'seen':'all',tag:'',q:'',sort:'new'};$$('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));scrollTo(0,0);render()}
+const render=()=>{S.view==='home'?home():lib();hy($('#main'))};
+const row=(t,l,link='')=>l.length?`<section class="row"><div class="rh"><h2>${t}</h2>${link}</div><div class="rs">${l.slice(0,24).map((r,i)=>cardHTML(r,i)).join('')}</div></section>`:'';
+function home(){const rv=S.reviews,rev=rv.slice().reverse(),sn=r=>{const m=S.marks.get(r.id);return m&&m.seen};
+let seen=0,liked=0,ag=0,an=0;rv.forEach(r=>{const m=S.marks.get(r.id);if(m&&m.seen){seen++;if(m.liked>0)liked++;if(m.liked&&r.r!==2){an++;if((m.liked>0)===(r.r>=3))ag++}}});
+const h=new Date().getHours(),g=h<5?'Still up':h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+const cnt=RT.map((_,i)=>rv.filter(r=>r.r===i).length);
+if(!rv.length){$('#main').innerHTML=`<div class="empty">${ico('film')}<h2>No reviews yet</h2><p>reviews.txt wasn't found next to this page, or it's empty. Export one from the Editor and put it beside index.html.</p></div>`;return}
+$('#main').innerHTML=`<header class="hero"><div><h1>${g}, ${esc(S.user.name)}</h1><p>${rv.length} reviewed movies. ${rv.length-seen} still unwatched.</p></div><div class="stats"><div class="st bl"><b>${seen}</b><small>watched</small></div><div class="st pk"><b>${liked}</b><small>loved</small></div><div class="st"><b>${an?Math.round(ag/an*100)+'%':'—'}</b><small>agree with reviews</small></div></div></header>
+<div class="r5">${RT.map((x,i)=>`<button class="rc sq" data-gor="${i}" style="--c:${x.c}">${ico('r'+i)}<b>${cnt[i]}</b><small>${x.n}</small></button>`).join('')}</div>
+${row('Must watch',rev.filter(r=>r.r===4).sort((a,b)=>sn(a)-sn(b)),'<button data-gor="4">See all</button>')}
+${row('Good picks you haven\u2019t seen',rev.filter(r=>r.r===3&&!sn(r)),'<button data-gor="3">See all</button>')}
+${row('Latest reviews',rev,'<button data-v="lib">Library</button>')}
+${row('Your watched shelf',[...S.marks.values()].filter(m=>m.seen&&S.map.has(m.id)).sort((a,b)=>b.t-a.t).map(m=>S.map.get(m.id)),'<button data-v="seen">See all</button>')}
+${row('Skip these',rev.filter(r=>r.r===0),'<button data-gor="0">See all</button>')}`}
+function lib(){const f=S.f,tc=new Map();S.reviews.forEach(r=>{r.tags.forEach(t=>tc.set(t,(tc.get(t)||0)+1));r.custom.forEach(c=>tc.set('c'+c,(tc.get('c'+c)||0)+1))});
+const tn=k=>typeof k==='number'?TAGS[k][0]:'#'+k.slice(1);
+$('#main').innerHTML=`<h1 style="font-size:34px">${S.view==='seen'?'Watched':'Library'}</h1><div class="ctl"><label class="sb">${ico('search')}<input id="q" placeholder="Search title or tag" autocomplete="off"></label>
+<div class="chips" id="rp">${RT.map((x,i)=>`<button class="pill sq" data-r="${i}" style="--c:${x.c}">${ico('r'+i)}${x.n}</button>`).join('')}</div>
+<div class="chips" id="sp">${[['all','All'],['unseen','Unseen'],['seen','Seen'],['liked','Loved']].map(a=>`<button class="pill sq" data-s="${a[0]}">${a[1]}</button>`).join('')}</div>
+<select id="ft"><option value="">All tags</option>${[...tc].sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<option value="${k}">${esc(tn(k))} (${n})</option>`).join('')}</select>
+<select id="sr"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="top">Best rated</option><option value="low">Worst rated</option></select></div><div class="grid" id="gr"></div>`;
+const sync=()=>{$$('#rp .pill').forEach(b=>b.classList.toggle('on',f.r.has(+b.dataset.r)));$$('#sp .pill').forEach(b=>b.classList.toggle('on',b.dataset.s===f.seen));$('#q').value=f.q;$('#ft').value=f.tag;$('#sr').value=f.sort;grid()};
+$('#rp').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;const i=+b.dataset.r;f.r.has(i)?f.r.delete(i):f.r.add(i);sync()};
+$('#sp').onclick=e=>{const b=e.target.closest('[data-s]');if(b){f.seen=b.dataset.s;sync()}};
+$('#q').oninput=e=>{f.q=e.target.value;grid()};$('#ft').onchange=e=>{f.tag=e.target.value;grid()};$('#sr').onchange=e=>{f.sort=e.target.value;grid()};sync()}
+function grid(){const f=S.f,q=f.q.trim().toLowerCase();
+let l=S.reviews.filter(r=>{if(f.r.size&&!f.r.has(r.r))return false;const m=S.marks.get(r.id),sn=m&&m.seen;if(f.seen==='seen'&&!sn)return false;if(f.seen==='unseen'&&sn)return false;if(f.seen==='liked'&&!(m&&m.liked>0))return false;
+if(f.tag){if(f.tag[0]==='c'?!r.custom.includes(f.tag.slice(1)):!r.tags.includes(+f.tag))return false}
+if(q){const d=S.det.get(r.id);if(!((d&&(d.title+' '+d.dir).toLowerCase().includes(q))||r.custom.some(c=>c.includes(q))||r.tags.some(t=>TAGS[t][0].toLowerCase().includes(q))))return false}return true});
+const t=r=>(S.det.get(r.id)||{title:'~'}).title.toLowerCase();
+const s=f.sort;l.sort(s==='new'?(a,b)=>b.i-a.i:s==='old'?(a,b)=>a.i-b.i:s==='az'?(a,b)=>t(a)<t(b)?-1:1:s==='top'?(a,b)=>b.r-a.r||b.i-a.i:(a,b)=>a.r-b.r||b.i-a.i);
+const g=$('#gr');g.innerHTML=l.length?l.map((r,i)=>cardHTML(r,i)).join(''):`<div class="empty" style="grid-column:1/-1">${ico('film')}<p>Nothing matches. Loosen a filter.</p></div>`;hy(g)}
+/* modal */
+function openModal(id){const r=S.map.get(id);if(!r)return;S.open=id;const R=RT[r.r],m=$('#md');m.hidden=false;
+m.innerHTML=`<div class="sheet" style="--c:${R.c}"><button class="x sq" data-x aria-label="Close">${ico('x')}</button><div class="bd" id="bdp"></div><div class="mb"><div class="mp po" id="mpp"></div><div class="mi" id="mi"></div></div></div>`;fillModal(id,true);if(!S.det.has(id))fetchDet(id)}
+function fillModal(id,first){const r=S.map.get(id),d=S.det.get(id),R=RT[r.r],m=S.marks.get(id)||{};if(!$('#mi'))return;
+if(d&&(first||!$('#mpp img'))){const p=$('#mpp');p.dataset.p=d.poster||'';delete p.dataset.o;hy(p);if(d.backdrop)img(d.backdrop,'w780').then(u=>{const b=$('#bdp');if(b)b.style.backgroundImage=`url("${u}")`})}
+const tg=r.tags.map(t=>`<span>${esc(TAGS[t][0])}</span>`).join('')+r.custom.map(c=>`<span class="c">#${esc(c)}</span>`).join('');
+$('#mi').innerHTML=`<div class="vd">${ico('r'+r.r)}${R.n}</div><h2>${d?esc(d.title):'Loading…'}</h2>${d?`<div class="meta">${esc([d.year,d.runtime?d.runtime+' min':'',d.dir].filter(Boolean).join('  \u2022  '))}</div>`:''}${tg?`<div class="tg">${tg}</div>`:''}${r.note?`<div class="note"><small>From the reviewer</small>${esc(r.note)}</div>`:''}${d&&d.overview?`<p class="ov">${esc(d.overview)}</p>`:''}
+<div class="acts"><button class="ab sq ${m.seen?'on':''}" data-act="seen">${ico('eye')}${m.seen?'Seen':'Mark as seen'}</button>${m.seen?`<button class="ab lk sq ${m.liked>0?'on':''}" data-act="like">${ico('heart')}I liked it</button><button class="ab dl sq ${m.liked<0?'on':''}" data-act="dis">${ico('r1')}Not for me</button>`:''}</div>`}
+async function mark(id,act){const m=Object.assign({k:S.user.id+':'+id,uid:S.user.id,id,seen:false,liked:0},S.marks.get(id));
+if(act==='seen'){m.seen=!m.seen;if(!m.seen)m.liked=0}else{const v=act==='like'?1:-1;m.liked=m.liked===v?0:v;m.seen=true}
+m.t=Date.now();if(!m.seen&&!m.liked){S.marks.delete(id);await del('marks',m.k)}else{S.marks.set(id,m);await put('marks',m)}paint(id);fillModal(id)}
+function closeModal(){S.open=null;$('#md').hidden=true;$('#md').innerHTML='';render()}
+/* events */
+document.addEventListener('click',e=>{const t=e.target;let b;
+if(b=t.closest('[data-act]'))return mark(S.open,b.dataset.act);
+if(t.closest('[data-x]')||t.id==='md')return closeModal();
+if(b=t.closest('.card'))return openModal(+b.dataset.id);
+if(b=t.closest('[data-gor]')){go2('lib');S.f.r.add(+b.dataset.gor);return lib()}
+if(b=t.closest('[data-v]'))return go2(b.dataset.v)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.open)closeModal()});
+$('#so').onclick=()=>{delete localStorage.rf_uid;location.reload()};
+/* boot */
+(async()=>{
+const txt=await fetch('reviews.txt').then(r=>r.ok?r.text():'').catch(()=>'');
+await idb;S.map=parse(txt);S.reviews=[...S.map.values()];S.reviews.forEach((r,i)=>r.i=i);
+(await all('details')).forEach(d=>S.det.set(d.id,d));
+const uid=+localStorage.rf_uid,u=uid&&await get('users',uid);
+u?await enter(u):await showAuth();
+setTimeout(()=>{$('#ld').classList.add('gone');setTimeout(()=>$('#ld').remove(),600)},250)
+})();
+</script>
+</body>
+</html>
