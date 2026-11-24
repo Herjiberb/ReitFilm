@@ -81,6 +81,7 @@ main{padding:34px clamp(16px,3vw,44px) 90px;min-width:0}
 .rb{position:absolute;top:8px;left:8px;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:#06070dd9;color:var(--c);backdrop-filter:blur(6px);border:1.5px solid color-mix(in srgb,var(--c) 55%,transparent)}
 .sn{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--b);color:#fff}
 .sn .i{width:17px;height:17px}.sn.lk{background:var(--p);color:#2a0b28}.sn.dis{background:#5b6290}
+.mt{position:absolute;left:8px;bottom:8px;background:linear-gradient(135deg,var(--b),#c77dff 60%,var(--p));padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:800;color:#fff;box-shadow:0 4px 12px #0007}
 .ct{margin-top:9px;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cy{color:var(--m);font-size:13px}
 .sk{display:block;height:14px;width:80%;border-radius:8px;background:linear-gradient(90deg,var(--s2),var(--s3),var(--s2));background-size:200%;animation:sh 1.2s linear infinite}
@@ -198,18 +199,41 @@ const get=(s,k)=>tx(s,'readonly',st=>st.get(k)),all=s=>tx(s,'readonly',st=>st.ge
 const iu=new Map();
 async function img(p,size){const u=`https://image.tmdb.org/t/p/${size}${p}`;if(iu.has(u))return iu.get(u);let out=u;try{const c=await caches.open('rf-img');let r=await c.match(u);if(!r){r=await fetch(u);if(r.ok)await c.put(u,r.clone());else return u}out=URL.createObjectURL(await r.blob())}catch(e){}iu.set(u,out);return out}
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const el=e.target,p=el.dataset.p;if(p)img(p,'w342').then(u=>{const i=new Image();i.alt='';el.querySelectorAll('img').forEach(x=>x.remove());i.onload=()=>el.classList.add('ld');i.src=u;el.prepend(i)})}),{rootMargin:'400px'});
-const hy=(root=document)=>{const l=$$('.po[data-p]:not([data-o])',root);if(root.matches&&root.matches('.po[data-p]:not([data-o])'))l.push(root);l.forEach(el=>{el.dataset.o=1;if(el.dataset.p)io.observe(el)})};
+const hy=(root=document)=>{const sel='.po[data-p]:not([data-o])',l=$$(sel,root);if(root.matches&&root.matches(sel))l.push(root);l.forEach(el=>{el.dataset.o=1;if(el.dataset.p)io.observe(el)});const c=$$('.card.nd:not([data-q])',root);if(root.matches&&root.matches('.card.nd:not([data-q])'))c.push(root);c.forEach(el=>{el.dataset.q=1;io2.observe(el)})};
 /* state */
 const S={user:null,reviews:[],map:new Map(),det:new Map(),marks:new Map(),view:'home',f:{}};
 /* details loader */
 const Q=[];let run=0;
 function loadDetails(){S.reviews.slice().reverse().forEach(r=>{if(!S.det.has(r.id)&&!Q.includes(r.id))Q.push(r.id)});pump()}
-function pump(){while(run<8&&Q.length){run++;fetchDet(Q.shift()).finally(()=>{run--;pump()})}}
+const FL=new Set();
+function pump(){while(run<8&&Q.length){const id=Q.shift();if(S.det.has(id)||FL.has(id))continue;FL.add(id);run++;fetchDet(id).finally(()=>{FL.delete(id);run--;pump()})}
+if(!run&&!Q.length&&S.view==='home'&&!S.open&&S.user&&S.reviews.length){const sg=recs(profile(),14).map(x=>x.r.id).join();if(sg!==S.sig)render()}}
+const io2=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io2.unobserve(e.target);const id=+e.target.dataset.id;if(S.det.has(id)||FL.has(id))return;const i=Q.indexOf(id);if(i>=0)Q.splice(i,1);Q.unshift(id);pump()}),{rootMargin:'600px'});
 async function fetchDet(id,retry=0){try{const d=await tmdb(`/movie/${id}?append_to_response=credits`);const x={id,title:d.title,year:(d.release_date||'').slice(0,4),poster:d.poster_path,backdrop:d.backdrop_path,overview:d.overview,tagline:d.tagline,runtime:d.runtime,genres:(d.genres||[]).map(g=>g.name),vote:d.vote_average,dir:((d.credits&&d.credits.crew)||[]).filter(c=>c.job==='Director').map(c=>c.name).slice(0,2).join(', ')};S.det.set(id,x);put('details',x);paint(id)}catch(e){if(e.message==='404'){S.det.set(id,{id,title:'Unknown movie #'+id,year:'',genres:[]});paint(id)}else if(retry<2){await new Promise(r=>setTimeout(r,900*(retry+1)));return fetchDet(id,retry+1)}}}
 /* cards */
-function cardHTML(r,i=0){const d=S.det.get(r.id),m=S.marks.get(r.id),R=RT[r.r];
-return `<div class="card" data-id="${r.id}" style="--i:${Math.min(i,20)}"><div class="po" data-p="${d?esc(d.poster||''):''}">${d&&!d.poster?`<span class="np">${esc(d.title)}</span>`:''}<span class="rb" style="--c:${R.c}" title="${R.n}">${ico('r'+r.r)}</span>${m&&m.seen?`<span class="sn ${m.liked>0?'lk':m.liked<0?'dis':''}">${ico(m.liked>0?'heart':m.liked<0?'r1':'eye')}</span>`:''}</div><div class="ct">${d?esc(d.title):'<i class="sk"></i>'}</div><div class="cy">${d?esc(d.year):'&nbsp;'}</div></div>`}
-function paint(id){const r=S.map.get(id);if(!r)return;$$(`.card[data-id="${id}"]`).forEach(c=>{const n=document.createElement('div');n.innerHTML=cardHTML(r);const e=n.firstChild;e.style.animation='none';c.replaceWith(e);hy(e)});if(S.open===id)fillModal(id)}
+function cardHTML(r,i=0,ex={}){const d=S.det.get(r.id),m=S.marks.get(r.id),R=RT[r.r];
+return `<div class="card${d?'':' nd'}" data-id="${r.id}" data-pct="${ex.pct||''}" data-sub="${esc(ex.sub||'')}" style="--i:${Math.min(i,20)}"><div class="po" data-p="${d?esc(d.poster||''):''}">${d&&!d.poster?`<span class="np">${esc(d.title)}</span>`:''}<span class="rb" style="--c:${R.c}" title="${R.n}">${ico('r'+r.r)}</span>${ex.pct?`<span class="mt">${ex.pct}% match</span>`:''}${m&&m.seen?`<span class="sn ${m.liked>0?'lk':m.liked<0?'dis':''}">${ico(m.liked>0?'heart':m.liked<0?'r1':'eye')}</span>`:''}</div><div class="ct">${d?esc(d.title):'<i class="sk"></i>'}</div><div class="cy">${ex.sub?esc(ex.sub):d?esc(d.year):'&nbsp;'}</div></div>`}
+function paint(id){const r=S.map.get(id);if(!r)return;$$(`.card[data-id="${id}"]`).forEach(c=>{const n=document.createElement('div');n.innerHTML=cardHTML(r,0,{pct:c.dataset.pct,sub:c.dataset.sub});const e=n.firstChild;e.style.animation='none';c.replaceWith(e);hy(e)});if(S.open===id)fillModal(id)}
+/* recommender: features = reviewer tags + custom tags + director (details cached as they load). Taste = what you liked/disliked/saw. */
+const isSeen=r=>{const m=S.marks.get(r.id);return m&&m.seen};
+const pct=s=>Math.max(5,Math.min(99,Math.round(100/(1+Math.exp(-(s-.4)*1.1)))));
+function feats(r){const d=S.det.get(r.id),f=r.tags.map(t=>'t'+t);r.custom.forEach(c=>f.push('c'+c));if(d&&d.dir)d.dir.split(', ').forEach(x=>f.push('d'+x));return f}
+function profile(){const aff=new Map(),cnt=new Map();let n=0;
+for(const m of S.marks.values()){const r=S.map.get(m.id);if(!m.seen||!r)continue;n++;const w=m.liked>0?1+(r.r>=3?.15:0):m.liked<0?-1:.2;
+for(const f of feats(r)){aff.set(f,(aff.get(f)||0)+w);cnt.set(f,(cnt.get(f)||0)+1)}}
+const p=new Map();for(const[f,v]of aff)p.set(f,v/(cnt.get(f)+1.5));return{p,n}}
+function score(r,P){const d=S.det.get(r.id),fs=feats(r);let s=0;for(const f of fs)s+=(P.p.get(f)||0)*(f[0]==='d'?1.6:1);s=fs.length?s/Math.sqrt(fs.length):0;
+return s*1.4+(r.r-2)*.45+(d&&d.vote?(d.vote-6.5)*.12:0)}
+function recs(P,n){const c=S.reviews.filter(r=>!isSeen(r)&&r.r>=2).map(r=>({r,s:score(r,P),f:new Set(feats(r))})).sort((a,b)=>b.s-a.s),out=[],used=new Map();
+while(out.length<n&&c.length){let bi=0,bv=-1e9;for(let i=0;i<Math.min(c.length,60);i++){const x=c[i];let pen=0;for(const f of x.f)pen+=used.get(f)||0;const v=x.s-pen/Math.sqrt(x.f.size||1)*.12;if(v>bv){bv=v;bi=i}}
+const x=c.splice(bi,1)[0];out.push(x);for(const f of x.f)used.set(f,(used.get(f)||0)+1)}return out}
+function recRow(t,items,hint=''){return items.length?`<section class="row"><div class="rh"><h2>${esc(t)}</h2>${hint}</div><div class="rs">${items.map((x,i)=>cardHTML(x.r,i,x.ex)).join('')}</div></section>`:''}
+function recHTML(){if(!S.reviews.length)return'';const P=profile(),R=recs(P,14);S.sig=R.map(x=>x.r.id).join();
+const lf=[...S.marks.values()].filter(m=>m.liked>0&&S.map.has(m.id)).sort((a,b)=>b.t-a.t).map(m=>({r:S.map.get(m.id),f:new Set(feats(S.map.get(m.id)))}));
+const why=x=>{let b=null,bs=0;for(const l of lf){let n=0;for(const f of x.f)if(l.f.has(f))n++;const j=n/Math.sqrt(x.f.size*l.f.size||1);if(n>=2&&j>bs){bs=j;b=l.r}}const d=b&&S.det.get(b.id);return d?'Because you liked '+d.title:x.r.r===4?'MUST WATCH pick':P.n?'Matches your taste':'Reviewer approved'};
+let h=recRow('Recommended for you',R.map(x=>({r:x.r,ex:{pct:pct(x.s),sub:why(x)}})),P.n<3?'<small style="color:var(--m)">Mark a few movies as seen and liked to sharpen this</small>':'');
+h+=lf.slice(0,2).map(l=>{const d=S.det.get(l.r.id);if(!d)return'';const c=S.reviews.filter(r=>!isSeen(r)&&r.r>=2).map(r=>{const f=feats(r);let n=0;f.forEach(x=>l.f.has(x)&&n++);return{r,n,j:n/Math.sqrt(f.length*l.f.size||1)}}).filter(x=>x.n>=2).sort((a,b)=>b.j-a.j||b.r.r-a.r.r).slice(0,14);
+return recRow('Because you liked '+d.title,c.map(x=>({r:x.r,ex:{pct:Math.min(99,Math.round(x.j*130))}})))}).join('');return h}
 /* auth */
 async function delProfile(id){const u=await get('users',id);if(!u||!confirm('Delete profile "'+u.name+'" and all its watched/liked marks from this device? This cannot be undone.'))return false;
 const ms=(await all('marks')).filter(m=>m.uid===id);await Promise.all(ms.map(m=>del('marks',m.k)));await del('users',id);if(+localStorage.rf_uid===id)delete localStorage.rf_uid;return true}
@@ -233,6 +257,7 @@ const cnt=RT.map((_,i)=>rv.filter(r=>r.r===i).length);
 if(!rv.length){$('#main').innerHTML=`<div class="empty">${ico('film')}<h2>No reviews yet</h2><p>reviews.txt wasn't found next to this page, or it's empty. Export one from the Editor and put it beside index.html.</p></div>`;return}
 $('#main').innerHTML=`<header class="hero"><div><h1>${g}, ${esc(S.user.name)}</h1><p>${rv.length} reviewed movies. ${rv.length-seen} still unwatched.</p></div><div class="stats"><div class="st bl"><b>${seen}</b><small>watched</small></div><div class="st pk"><b>${liked}</b><small>loved</small></div><div class="st"><b>${an?Math.round(ag/an*100)+'%':'—'}</b><small>agree with reviews</small></div></div></header>
 <div class="r5">${RT.map((x,i)=>`<button class="rc sq" data-gor="${i}" style="--c:${x.c}">${ico('r'+i)}<b>${cnt[i]}</b><small>${x.n}</small></button>`).join('')}</div>
+${recHTML()}
 ${row('Must watch',rev.filter(r=>r.r===4).sort((a,b)=>sn(a)-sn(b)),'<button data-gor="4">See all</button>')}
 ${row('Good picks you haven\u2019t seen',rev.filter(r=>r.r===3&&!sn(r)),'<button data-gor="3">See all</button>')}
 ${row('Latest reviews',rev,'<button data-v="lib">Library</button>')}
@@ -244,7 +269,7 @@ $('#main').innerHTML=`<h1 style="font-size:34px">${S.view==='seen'?'Watched':'Li
 <div class="chips" id="rp">${RT.map((x,i)=>`<button class="pill sq" data-r="${i}" style="--c:${x.c}">${ico('r'+i)}${x.n}</button>`).join('')}</div>
 <div class="chips" id="sp">${[['all','All'],['unseen','Unseen'],['seen','Seen'],['liked','Loved']].map(a=>`<button class="pill sq" data-s="${a[0]}">${a[1]}</button>`).join('')}</div>
 <select id="ft"><option value="">All tags</option>${[...tc].sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<option value="${k}">${esc(tn(k))} (${n})</option>`).join('')}</select>
-<select id="sr"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="top">Best rated</option><option value="low">Worst rated</option></select></div><div class="grid" id="gr"></div>`;
+<select id="sr"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="top">Best rated</option><option value="low">Worst rated</option><option value="match">Best match</option></select></div><div class="grid" id="gr"></div>`;
 const sync=()=>{$$('#rp .pill').forEach(b=>b.classList.toggle('on',f.r.has(+b.dataset.r)));$$('#sp .pill').forEach(b=>b.classList.toggle('on',b.dataset.s===f.seen));$('#q').value=f.q;$('#ft').value=f.tag;$('#sr').value=f.sort;grid()};
 $('#rp').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;const i=+b.dataset.r;f.r.has(i)?f.r.delete(i):f.r.add(i);sync()};
 $('#sp').onclick=e=>{const b=e.target.closest('[data-s]');if(b){f.seen=b.dataset.s;sync()}};
@@ -254,8 +279,8 @@ let l=S.reviews.filter(r=>{if(f.r.size&&!f.r.has(r.r))return false;const m=S.mar
 if(f.tag){if(f.tag[0]==='c'?!r.custom.includes(f.tag.slice(1)):!r.tags.includes(+f.tag))return false}
 if(q){const d=S.det.get(r.id);if(!((d&&(d.title+' '+d.dir).toLowerCase().includes(q))||r.custom.some(c=>c.includes(q))||r.tags.some(t=>TAGS[t][0].toLowerCase().includes(q))))return false}return true});
 const t=r=>(S.det.get(r.id)||{title:'~'}).title.toLowerCase();
-const s=f.sort;l.sort(s==='new'?(a,b)=>b.i-a.i:s==='old'?(a,b)=>a.i-b.i:s==='az'?(a,b)=>t(a)<t(b)?-1:1:s==='top'?(a,b)=>b.r-a.r||b.i-a.i:(a,b)=>a.r-b.r||b.i-a.i);
-const g=$('#gr');g.innerHTML=l.length?l.map((r,i)=>cardHTML(r,i)).join(''):`<div class="empty" style="grid-column:1/-1">${ico('film')}<p>Nothing matches. Loosen a filter.</p></div>`;hy(g)}
+const s=f.sort;let MX=null;if(s==='match'){const P=profile();MX=new Map(l.map(r=>[r.id,score(r,P)]))}l.sort(s==='match'?(a,b)=>MX.get(b.id)-MX.get(a.id):s==='new'?(a,b)=>b.i-a.i:s==='old'?(a,b)=>a.i-b.i:s==='az'?(a,b)=>t(a)<t(b)?-1:1:s==='top'?(a,b)=>b.r-a.r||b.i-a.i:(a,b)=>a.r-b.r||b.i-a.i);
+const g=$('#gr');g.innerHTML=l.length?l.map((r,i)=>cardHTML(r,i,MX?{pct:pct(MX.get(r.id))}:{})).join(''):`<div class="empty" style="grid-column:1/-1">${ico('film')}<p>Nothing matches. Loosen a filter.</p></div>`;hy(g)}
 /* modal */
 function openModal(id){const r=S.map.get(id);if(!r)return;S.open=id;const R=RT[r.r],m=$('#md');m.hidden=false;
 m.innerHTML=`<div class="sheet" style="--c:${R.c}"><button class="x sq" data-x aria-label="Close">${ico('x')}</button><div class="bd" id="bdp"></div><div class="mb"><div class="mp po" id="mpp"></div><div class="mi" id="mi"></div></div></div>`;fillModal(id,true);if(!S.det.has(id))fetchDet(id)}
