@@ -40,7 +40,7 @@ button{cursor:pointer}
 .btn{background:linear-gradient(135deg,var(--b),#6a5cff);border-radius:18px;padding:14px 20px;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center;box-shadow:0 8px 24px #3b82ff55}
 .btn.pk{background:linear-gradient(135deg,var(--p),#c77dff);box-shadow:0 8px 24px #ff8ad855;color:#240a22}
 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-.pf{display:flex;align-items:center;gap:8px;background:var(--s2);border-radius:99px;padding:6px 14px 6px 6px}
+.pf{display:flex;align-items:center;background:var(--s2);border-radius:99px}.pfb{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 6px;border-radius:99px}.pfx{padding:8px 12px 8px 4px;color:var(--m);border-radius:99px;display:grid}.pfx:hover{color:#ff6b8f}
 .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(135deg,hsl(var(--h) 90% 60%),hsl(calc(var(--h) + 50) 90% 55%));flex:none}
 .err{color:#ff6b8f;min-height:1.2em;font-size:13px}
 /* app */
@@ -154,6 +154,7 @@ select option{background:var(--s1)}
 <symbol id="check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
 <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 <symbol id="out" viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/></symbol>
+<symbol id="trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
 <symbol id="film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></symbol>
 </svg>
 
@@ -167,7 +168,7 @@ select option{background:var(--s1)}
 <button class="nb sq" data-v="home"><svg class="i"><use href="#home"/></svg>Home</button>
 <button class="nb sq" data-v="lib"><svg class="i"><use href="#grid"/></svg>Library</button>
 <button class="nb sq" data-v="seen"><svg class="i"><use href="#check"/></svg>Watched</button>
-<div class="me"><div class="av" id="mav"></div><span id="mnm"></span><button id="so" title="Sign out"><svg class="i"><use href="#out"/></svg></button></div>
+<div class="me"><div class="av" id="mav"></div><span id="mnm"></span><button id="so" title="Switch profile"><svg class="i"><use href="#out"/></svg></button><button id="dp" title="Delete profile"><svg class="i"><use href="#trash"/></svg></button></div>
 </nav>
 <main id="main"></main>
 </div>
@@ -210,17 +211,15 @@ function cardHTML(r,i=0){const d=S.det.get(r.id),m=S.marks.get(r.id),R=RT[r.r];
 return `<div class="card" data-id="${r.id}" style="--i:${Math.min(i,20)}"><div class="po" data-p="${d?esc(d.poster||''):''}">${d&&!d.poster?`<span class="np">${esc(d.title)}</span>`:''}<span class="rb" style="--c:${R.c}" title="${R.n}">${ico('r'+r.r)}</span>${m&&m.seen?`<span class="sn ${m.liked>0?'lk':m.liked<0?'dis':''}">${ico(m.liked>0?'heart':m.liked<0?'r1':'eye')}</span>`:''}</div><div class="ct">${d?esc(d.title):'<i class="sk"></i>'}</div><div class="cy">${d?esc(d.year):'&nbsp;'}</div></div>`}
 function paint(id){const r=S.map.get(id);if(!r)return;$$(`.card[data-id="${id}"]`).forEach(c=>{const n=document.createElement('div');n.innerHTML=cardHTML(r);const e=n.firstChild;e.style.animation='none';c.replaceWith(e);hy(e)});if(S.open===id)fillModal(id)}
 /* auth */
-async function hash(p,n){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(n+':'+p));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return p}}
-async function showAuth(sel){const us=await all('users');const a=$('#auth');$('#app').hidden=true;a.hidden=false;
-const u=sel&&us.find(x=>x.id===sel);
-a.innerHTML=`<div class="ac"><svg class="lg"><use href="#logo"/></svg>${u?`<h1>Hi, ${esc(u.name)}</h1><p>Enter your PIN</p><input class="fld" id="pin" type="password" inputmode="numeric" placeholder="PIN" autofocus><div class="err" id="er"></div><button class="btn sq" id="go">Sign in</button><button class="pill sq" id="bk" style="justify-self:center">Back</button>`:`<h1>ReitFilm</h1><p>Every movie, rated honestly. Join to track what you've watched.</p>${us.length?`<div class="chips">${us.map(x=>`<button class="pf sq" data-u="${x.id}"><span class="av" style="--h:${x.hue}">${esc(x.name[0].toUpperCase())}</span>${esc(x.name)}</button>`).join('')}</div><p style="font-size:13px">or create a new profile</p>`:''}<input class="fld" id="nm" maxlength="20" placeholder="Pick a name"><input class="fld" id="pn" type="password" inputmode="numeric" maxlength="12" placeholder="PIN (optional)"><div class="err" id="er"></div><button class="btn pk sq" id="go">Join ReitFilm</button>`}</div>`;
-$$('[data-u]',a).forEach(b=>b.onclick=async()=>{const x=us.find(y=>y.id==b.dataset.u);x.pin?showAuth(x.id):enter(x)});
-const er=m=>$('#er').textContent=m;
-if($('#bk'))$('#bk').onclick=()=>showAuth();
-const go=async()=>{if(u){if(await hash($('#pin').value,u.name.toLowerCase())===u.pin)enter(u);else er('Wrong PIN. Try again.');return}
-const n=$('#nm').value.trim();if(!n)return er('Pick a name first.');if(us.some(x=>x.name.toLowerCase()===n.toLowerCase()))return er('That name is taken on this device.');
-const pv=$('#pn').value;const nu={name:n,pin:pv?await hash(pv,n.toLowerCase()):'',hue:Math.floor(Math.random()*360),created:Date.now()};nu.id=await tx('users','readwrite',st=>st.add(nu));enter(nu)};
-$('#go').onclick=go;a.onkeydown=e=>{if(e.key==='Enter')go()}}
+async function delProfile(id){const u=await get('users',id);if(!u||!confirm('Delete profile "'+u.name+'" and all its watched/liked marks from this device? This cannot be undone.'))return false;
+const ms=(await all('marks')).filter(m=>m.uid===id);await Promise.all(ms.map(m=>del('marks',m.k)));await del('users',id);if(+localStorage.rf_uid===id)delete localStorage.rf_uid;return true}
+async function showAuth(){const us=await all('users');const a=$('#auth');$('#app').hidden=true;a.hidden=false;
+a.innerHTML=`<div class="ac"><svg class="lg"><use href="#logo"/></svg><h1>ReitFilm</h1><p>Every movie, rated honestly. Pick your profile or join to track what you've watched.</p>${us.length?`<div class="chips">${us.map(x=>`<span class="pf"><button class="pfb sq" data-u="${x.id}"><span class="av" style="--h:${x.hue}">${esc(x.name[0].toUpperCase())}</span>${esc(x.name)}</button><button class="pfx sq" data-d="${x.id}" title="Delete profile" aria-label="Delete ${esc(x.name)}">${ico('trash')}</button></span>`).join('')}</div><p style="font-size:13px">or create a new profile</p>`:''}<input class="fld" id="nm" maxlength="20" placeholder="Pick a name"><div class="err" id="er"></div><button class="btn pk sq" id="go">Join ReitFilm</button></div>`;
+$$('[data-u]',a).forEach(b=>b.onclick=()=>enter(us.find(y=>y.id==b.dataset.u)));
+$$('[data-d]',a).forEach(b=>b.onclick=async()=>{if(await delProfile(+b.dataset.d))showAuth()});
+const go=async()=>{const n=$('#nm').value.trim(),er=$('#er');if(!n)return er.textContent='Pick a name first.';if(us.some(x=>x.name.toLowerCase()===n.toLowerCase()))return er.textContent='That name is already on this device.';
+const nu={name:n,hue:Math.floor(Math.random()*360),created:Date.now()};nu.id=await tx('users','readwrite',st=>st.add(nu));enter(nu)};
+$('#go').onclick=go;a.onkeydown=e=>{if(e.key==='Enter'&&e.target.id==='nm')go()}}
 async function enter(u){S.user=u;localStorage.rf_uid=u.id;S.marks=new Map((await all('marks')).filter(m=>m.uid===u.id).map(m=>[m.id,m]));
 $('#auth').hidden=true;$('#app').hidden=false;$('#mav').textContent=u.name[0].toUpperCase();$('#mav').className='av';$('#mav').style.setProperty('--h',u.hue);$('#mnm').textContent=u.name;go2('home');loadDetails()}
 /* views */
@@ -278,6 +277,7 @@ if(b=t.closest('[data-gor]')){go2('lib');S.f.r.add(+b.dataset.gor);return lib()}
 if(b=t.closest('[data-v]'))return go2(b.dataset.v)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.open)closeModal()});
 $('#so').onclick=()=>{delete localStorage.rf_uid;location.reload()};
+$('#dp').onclick=async()=>{if(await delProfile(S.user.id))location.reload()};
 /* boot */
 (async()=>{
 const txt=await fetch('reviews.txt').then(r=>r.ok?r.text():'').catch(()=>'');
