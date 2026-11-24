@@ -197,8 +197,8 @@ const get=(s,k)=>tx(s,'readonly',st=>st.get(k)),all=s=>tx(s,'readonly',st=>st.ge
 /* image cache (Cache API) */
 const iu=new Map();
 async function img(p,size){const u=`https://image.tmdb.org/t/p/${size}${p}`;if(iu.has(u))return iu.get(u);let out=u;try{const c=await caches.open('rf-img');let r=await c.match(u);if(!r){r=await fetch(u);if(r.ok)await c.put(u,r.clone());else return u}out=URL.createObjectURL(await r.blob())}catch(e){}iu.set(u,out);return out}
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const el=e.target,p=el.dataset.p;if(p)img(p,'w342').then(u=>{const i=new Image();i.alt='';i.onload=()=>el.classList.add('ld');i.src=u;el.prepend(i)})}),{rootMargin:'400px'});
-const hy=(root=document)=>$$('.po[data-p]:not([data-o])',root).forEach(el=>{el.dataset.o=1;if(el.dataset.p)io.observe(el)});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const el=e.target,p=el.dataset.p;if(p)img(p,'w342').then(u=>{const i=new Image();i.alt='';el.querySelectorAll('img').forEach(x=>x.remove());i.onload=()=>el.classList.add('ld');i.src=u;el.prepend(i)})}),{rootMargin:'400px'});
+const hy=(root=document)=>{const l=$$('.po[data-p]:not([data-o])',root);if(root.matches&&root.matches('.po[data-p]:not([data-o])'))l.push(root);l.forEach(el=>{el.dataset.o=1;if(el.dataset.p)io.observe(el)})};
 /* state */
 const S={user:null,reviews:[],map:new Map(),det:new Map(),marks:new Map(),view:'home',f:{}};
 /* details loader */
@@ -260,7 +260,7 @@ const g=$('#gr');g.innerHTML=l.length?l.map((r,i)=>cardHTML(r,i)).join(''):`<div
 function openModal(id){const r=S.map.get(id);if(!r)return;S.open=id;const R=RT[r.r],m=$('#md');m.hidden=false;
 m.innerHTML=`<div class="sheet" style="--c:${R.c}"><button class="x sq" data-x aria-label="Close">${ico('x')}</button><div class="bd" id="bdp"></div><div class="mb"><div class="mp po" id="mpp"></div><div class="mi" id="mi"></div></div></div>`;fillModal(id,true);if(!S.det.has(id))fetchDet(id)}
 function fillModal(id,first){const r=S.map.get(id),d=S.det.get(id),R=RT[r.r],m=S.marks.get(id)||{};if(!$('#mi'))return;
-if(d&&(first||!$('#mpp img'))){const p=$('#mpp');p.dataset.p=d.poster||'';delete p.dataset.o;hy(p);if(d.backdrop)img(d.backdrop,'w780').then(u=>{const b=$('#bdp');if(b)b.style.backgroundImage=`url("${u}")`})}
+if(d&&!$('#mpp').dataset.o){const p=$('#mpp');p.dataset.p=d.poster||'';hy(p);if(d.backdrop)img(d.backdrop,'w780').then(u=>{const b=$('#bdp');if(b)b.style.backgroundImage=`url("${u}")`})}
 const tg=r.tags.map(t=>`<span>${esc(TAGS[t][0])}</span>`).join('')+r.custom.map(c=>`<span class="c">#${esc(c)}</span>`).join('');
 $('#mi').innerHTML=`<div class="vd">${ico('r'+r.r)}${R.n}</div><h2>${d?esc(d.title):'Loading…'}</h2>${d?`<div class="meta">${esc([d.year,d.runtime?d.runtime+' min':'',d.dir].filter(Boolean).join('  \u2022  '))}</div>`:''}${tg?`<div class="tg">${tg}</div>`:''}${r.note?`<div class="note"><small>From the reviewer</small>${esc(r.note)}</div>`:''}${d&&d.overview?`<p class="ov">${esc(d.overview)}</p>`:''}
 <div class="acts"><button class="ab sq ${m.seen?'on':''}" data-act="seen">${ico('eye')}${m.seen?'Seen':'Mark as seen'}</button>${m.seen?`<button class="ab lk sq ${m.liked>0?'on':''}" data-act="like">${ico('heart')}I liked it</button><button class="ab dl sq ${m.liked<0?'on':''}" data-act="dis">${ico('r1')}Not for me</button>`:''}</div>`}
